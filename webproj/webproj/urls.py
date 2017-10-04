@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^about', views.about, name='about'),
     url(r'^login/$', auth.login, name='login'),
     url(r'^top/', views.top, name='top'),
-    url(r'^albumInfo/', views.albumInfo, name='albumInfo'),
+    url(r'^albumInfo/(?P<album>[\w|\W]+)/(?P<artist>[\w|\W]+)/$', views.albumInfo, name='albumInfo'),
+    url(r'^artistInfo/(?P<artist>[\w|\W]+)/$', views.artistInfo, name='artistInfo'),
 ]

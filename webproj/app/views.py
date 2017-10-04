@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -82,15 +84,13 @@ def top(request):
 
 
 
-def albumInfo(request):
-                                     # static test
-    albumNameArg = 'Believe'
-    artistNameArg = 'Cher'
+def albumInfo(request, album, artist):
+
 
     assert isinstance(request, HttpRequest)
 
     file = urlopen(
-        "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=32f8947b156b3993b3ff9159b81f4667&artist=" + artistNameArg + "&album=" + albumNameArg + "")
+        "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=32f8947b156b3993b3ff9159b81f4667&artist=" + str(artist) + "&album=" + str(album) + "")
     tree = ET.parse(file)
     root = tree.getroot()
     result = {}
@@ -102,22 +102,95 @@ def albumInfo(request):
         playcount = x.find('playcount').text
         image = x.find('.//image[@size="mega"]').text
         for y in x.findall('tracks/track'):  # tracks
-            tracks.append(y.find('name').text)
-
-        '''
-        result['album'] = album
-        result['artist'] = artist
-        result['listeners'] = listeners
-        result['playcount'] = playcount
-        result['tracks'] = tracks
-        '''
+            track=[]
+            track.append(y.find('name').text)
+            dur = int(y.find('duration').text)/100
+            track.append(dur)
+            tracks.append(track)
 
     tparams = {
-        'title': album + ' by ' + artist,
+        'album': album,
+        'artist':artist,
         'year': datetime.now().year,
         'image': image,
         'listeners' : listeners,
         'playcount' : playcount,
         'dict': tracks,
+        'title': album,
     }
     return render(request, 'albumInfo.html', tparams)
+
+
+def artistInfo(request, artist):
+    # funcao que retorna a informacao sobre o artista e respectivos artistas semelhantes
+    # artist= "Eminem"
+
+
+    assert isinstance(request, HttpRequest)
+    file = urlopen(
+        "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+str(artist)+"&api_key=32f8947b156b3993b3ff9159b81f4667")
+    tree = ET.parse(file)
+    root = tree.getroot()
+    similars = []
+    bio = []
+    for x in root.findall('artist'):
+        bio.append(x.find('bio/summary').text)
+        bio.append(x.find('bio/content').text)
+        bio.append(x.find('.//image[@size="mega"]').text)
+        bio.append(x.find('name').text)
+        for y in x.findall('similar/artist'):
+            similar = []
+            similar.append(y.find('name').text)
+            similar.append(y.find('.//image[@size="mega"]').text)
+            similars.append(similar)
+
+    topAlbums=getAlbums(artist)
+    top5 = topAlbums[:5]
+
+    topSongs=getSongs(artist)
+    songs5=topSongs[:5]
+
+    tparams = {
+        'summary' : bio[0],    # bio, sumario
+        'content' : bio[1],    # bio, texto completo
+        'image'   : bio[2],    # imagem artista
+        'name'    : bio[3],    # nome artista
+        'similars': similars,  # 0- name artists, 1- image
+        'topAlbums': topAlbums, # array de top albums
+        'top5': top5,
+        'songs5':songs5,
+        'title' : bio[3],
+    }
+    return render(request, 'artistInfo.html', tparams)
+
+
+def getAlbums(artista):
+
+    file = urlopen(
+        "http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=" + str(artista) + "&api_key=32f8947b156b3993b3ff9159b81f4667")
+    tree = ET.parse(file)
+    root = tree.getroot()
+    result = []
+
+    for x in root.findall('topalbums/album'):
+        aux = []
+        aux.append(str(x.find('name').text))
+        aux.append(x.find('image[@size="extralarge"]').text)
+        result.append(aux)
+
+    return result
+
+def getSongs(artista):
+    file = urlopen(
+        "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=" + artista + "&api_key=32f8947b156b3993b3ff9159b81f4667")
+    tree = ET.parse(file)
+    root = tree.getroot()
+    result = []
+
+    for x in root.findall('toptracks/track'):
+        aux = []
+        aux.append(x.find('name').text)
+        aux.append(x.find('image[@size="extralarge"]').text)
+        result.append(aux)
+
+    return result
