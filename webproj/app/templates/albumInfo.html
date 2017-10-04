@@ -2,38 +2,31 @@
 
 {% block content %}
 
-    <!-- Page Content -->
-    <section>
-    <div class="container">
-      <!-- Portfolio Item Heading -->
-      <h1 class="my-4">{{ album }}
-          <small><a href="/artistInfo/{{ artist }}"> {{ artist }}</a> </small>
-      </h1>
-    <br>
-      <!-- Portfolio Item Row -->
-      <div class="row">
-        <div class="col-md-4">
-          <img class="img-rounded" src="{{ image }}" alt="">
-        </div>
-        <div class="col-md-5">
-         <h4 class="my-3">Songs in {{ album }}:</h4>
-            <ul>
-                {% for x in dict %}
-                     <li> {{ x.0 }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-      </div>
+<!-- Page Content -->
+<section>
+<div class="container">
+  <!-- Portfolio Item Heading -->
+  <h1 class="my-4">{{ album }}
+      <small><a href="/artistInfo/{{ artist }}"> {{ artist }}</a> </small>
+  </h1>
+<br>
+  <!-- Portfolio Item Row -->
+  <div class="row">
+    <div class="col-md-4">
+      <img class="img-rounded" src="{{ image }}" alt="">
     </div>
-      <!-- /.row -->
-    </section>
-    <!-- /.container -->
-
-
-
-
-
-
-
+    <div class="col-md-5">
+     <h4 class="my-3">Songs in {{ album }}:</h4>
+        <ul>
+            {% for x in dict %}
+                 <li> {{ x.0 }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+  </div>
+</div>
+  <!-- /.row -->
+</section>
+<!-- /.container -->
 
 {% endblock %}
