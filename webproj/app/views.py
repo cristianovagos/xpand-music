@@ -12,7 +12,7 @@ def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
     tparams = {
-        'title':'Index',
+        'title':'xPand',
         'message':'Your indexx page.',
         'year':datetime.now().year,
     }
@@ -68,12 +68,12 @@ def top(request):
                 aux.append(nomeAlbum)
                 aux.append(nomeArtista)
                 aux.append(mbid)
-            img = y.find('image').text
+            img = y.find('.//image[@size="large"]').text
             aux.append(img)
             result.append(aux)
 
     tparams = {
-        'title':'teste',
+        'title':'TOP Categorias',
         'year':datetime.now().year,
         'array' :result,
     }
@@ -100,7 +100,7 @@ def albumInfo(request):
         artist = x.find('artist').text
         listeners = x.find('listeners').text
         playcount = x.find('playcount').text
-        image = x.find('image').text
+        image = x.find('.//image[@size="mega"]').text
         for y in x.findall('tracks/track'):  # tracks
             tracks.append(y.find('name').text)
 

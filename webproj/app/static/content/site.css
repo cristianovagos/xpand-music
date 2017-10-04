@@ -40,3 +40,15 @@ input[type="checkbox"].input-validation-error {
 .validation-summary-valid {
     display: none;
 }
+
+.carousel-inner {
+    width: 120%;
+    margin-left: -10%;
+}
+
+@media (min-width: 768px) {
+    .carousel-inner {
+        width: 100%;
+        margin: 0;
+    }
+}
