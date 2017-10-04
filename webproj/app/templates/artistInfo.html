@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="tab-content">
+  <hr id="home" class="tab-pane fade in active">
+      <hr>
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-4 order-2">
+            <div class="p-5">
+                <br>
+                <br>
+              <img class="img-circle" src="{{ image }}" alt="">
+            </div>
+          </div>
+          <div class="col-md-6 order-1">
+            <div class="p-5">
+              <h1 class="display-4">{{ name }}</h1>
+                <br>
+              <p> {{ summary }}</p>
+            </div>
+          </div>
+            <br>
+        </div>
+      </div>
+          <br>
+      <br>
+       <div class="row">
+            <div class="col-sm-4"><h4>Top Albums</h4>
+
+                <ul>
+            {% csrf_token %}
+              {% for x in top5 %}
+                  <br>
+                  <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> <a href="/albumInfo/{{ x.0 }}/{{ name }}"> {{ x.0 }}</a>
+                  <br>
+              {% endfor %}
+                </ul>
+            </div>
+            <div class="col-sm-4" align="left"><h4>Top Songs</h4>
+
+               <ul>
+            {% csrf_token %}
+              {% for x in songs5 %}
+                  <br>
+                  <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> {{ x.0 }}<img>
+                  <br>
+              {% endfor %}
+                </ul>
+            </div>
+           <div class="col-sm-4" align="left"><h4>Related</h4>
+
+             {% csrf_token %}
+              {% for x in similars %}
+                  <br>
+                 <img class="img-circle" src="{{ x.1 }}" height="84" width="84"><a href="/artistInfo/{{ x.0 }}"> {{ x.0 }}</a></li>
+                  <br>
+              {% endfor %}
+           </div>
+        </div>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

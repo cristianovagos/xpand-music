@@ -3,20 +3,11 @@
 {% block content %}
     <table class="table table-striped table-hover ">
     <br>
-    <div align=center>
-        Categories
-        <select>
-          <option value="rap">Rap</option>
-          <option value="disco">Disco</option>
-          <option value="jazz">Jazz</option>
-        </select>
-    </div>
   <thead>
     <tr>
       <th></th>
       <th>Artist</th>
       <th>Album</th>
-      <th>MBID</th>
     </tr>
   </thead>
   <tbody>
@@ -24,11 +15,11 @@
       {% for x in array %}
           <tr>
               <td></td>
-              <td>{{ x.1 }}</td>
-              <td><img src="{{ x.3 }}" height="60" width="60"> <b>{{ x.0 }}</b></td>
-              <td>{{ x.2 }}</td>
-          </tr>
+              <td><a href="/artistInfo/{{ x.1 }}">{{ x.1 }}</a></td>
+              <td><img src="{{ x.3 }}" height="60" width="60"> <b><a href="/albumInfo/{{ x.0 }}/{{ x.1 }}" />{{ x.0 }}</b></td>
       {% endfor %}
+            </tr>
+
 
 
       </tbody>
