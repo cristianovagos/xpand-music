@@ -7,6 +7,7 @@
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'content/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'content/site.css' %}" />
+    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
     <script src="{% static 'scripts/modernizr-2.6.2.js' %}"></script>
 </head>
 
@@ -19,7 +20,10 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="/" class="navbar-brand">xPand</a>
+                <a href="/" class="navbar-brand" style="font-family: 'Righteous', cursive;">
+                    <img src="../static/images/panda.png" title="Panda" width="24" height="24">
+                    xPand
+                </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
