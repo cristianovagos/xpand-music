@@ -11,4 +11,4 @@ Developers and collaborators:
 - André Nascimento (andrenascimento@ua.pt)
 
 External plugins added:
-- BaseXClient (sudo pip3.6 install BaseXClient)
+- BaseX (sudo apt-get install basex)
