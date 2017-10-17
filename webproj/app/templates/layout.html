@@ -21,7 +21,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a href="/" class="navbar-brand" style="font-family: 'Righteous', cursive;">
-                    <img src="../static/images/panda.png" title="Panda" width="24" height="24">
+                    <img src="{% static 'images/panda.png' %}" width="24" height="24">
                     xPand
                 </a>
             </div>
@@ -29,7 +29,6 @@
                 <ul class="nav navbar-nav">
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'about' %}">Playlists</a></li>
-                    <li><a href="{% url 'top' %}">Top Artists</a></li>
                 </ul>
                 {% include 'loginpartial.html' %}
             </div>

@@ -3,6 +3,7 @@ from urllib.parse import quote
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from webproj.app.api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, getArtistTopTracksIDURL
+from webproj.app.db.BaseXClient import Session
 
 class Artist:
 
@@ -20,7 +21,92 @@ class Artist:
 
         self.max_items = max_items
 
-        self.fetchInfo()
+        if(self.checkDatabase()):
+            self.fetchInfoDatabase()
+        else:
+            self.fetchInfo()
+            self.putInDatabase()
+
+    def checkDatabase(self):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')/artists " + \
+                    "return boolean($artists/artist/name/text() = '" + self.name + "')"
+
+            queryObj = session.query(query)
+
+            # loop through all results
+            for typecode, item in queryObj.iter():
+                result = item
+
+            queryObj.close()
+
+        finally:
+            if session:
+                session.close()
+
+            if result:
+                return True
+            return False
+
+    def putInDatabase(self):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')/artists " + \
+                    "let $node := " + \
+                    "<artist> " + \
+                    "   <name>" + self.name + "</name> " + \
+                    "   <mbid>" + self.mbid + "</mbid> " + \
+                    "   <image>" + self.image + "</image> " + \
+                    "   <bioShort>" + self.biographyShort + "</bioShort> " + \
+                    "   <bioFull>" + self.biographyFull + "</bioFull> " + \
+                    "   <similar>"
+
+            for similarArtist in self.similarArtists:
+                query += "  <artist> " + \
+                         "      <name>" + similarArtist[0] + "</name> " + \
+                         "      <image>" + similarArtist[1] + "</image> " + \
+                         "  </artist> "
+
+            query += "  </similar> " + \
+                     "  <albums></albums> " + \
+                     "  <topAlbums> "
+
+            for topAlbum in self.topAlbums:
+                query += "  <topAlbum> " + \
+                         "      <name>" + topAlbum[0] + "</name> " + \
+                         "      <image>" + topAlbum[1] + "</image> " + \
+                         "  </topAlbum> "
+
+            query += "  </topAlbums> " + \
+                     "  <topTracks> "
+
+            for topTrack in self.topTracks:
+                query += "  <topTrack> " + \
+                         "      <name>" + topTrack[0] + "</name> " + \
+                         "      <image>" + topTrack[1] + "</image> " + \
+                         "  </topTrack> "
+
+            query += "  </topTracks> " + \
+                     "  <tags> "
+
+            for tag in self.tags:
+                query += "<tag>" + tag + "</tag> "
+
+            query += "  </tags> " + \
+                     "</artist> " + \
+                     "return insert node $node into $artists"
+
+            queryObj = session.query(query)
+            print(session.info())
+
+            queryObj.close()
+
+        finally:
+            if session:
+                session.close()
 
     def fetchInfo(self):
         try:
