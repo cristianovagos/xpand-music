@@ -9,3 +9,6 @@ So, our idea is to use Last.fm XML API to fetch data from the artists, songs, al
 Developers and collaborators:
 - Cristiano Vagos (cristianovagos@ua.pt)
 - André Nascimento (andrenascimento@ua.pt)
+
+External plugins added:
+- BaseX (sudo apt-get install basex)
