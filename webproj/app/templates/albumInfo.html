@@ -7,7 +7,7 @@
 <div class="container">
   <!-- Portfolio Item Heading -->
   <h1 class="my-4">{{ album }}
-      <small><a href="/artistInfo/{{ artist }}"> {{ artist }}</a> </small>
+      <small><a href="/artist/{{ artist }}"> {{ artist }}</a> </small>
   </h1>
 <br>
   <!-- Portfolio Item Row -->
@@ -19,7 +19,7 @@
      <h4 class="my-3">Songs in {{ album }}:</h4>
         <ul>
             {% for x in dict %}
-                 <li> {{ x.0 }}</li>
+                 <li> {{ x }}</li>
             {% endfor %}
         </ul>
     </div>

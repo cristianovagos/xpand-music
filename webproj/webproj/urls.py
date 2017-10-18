@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin, auth
-
 from app import views
 
 urlpatterns = [
@@ -25,6 +24,6 @@ urlpatterns = [
     url(r'^about', views.about, name='about'),
     url(r'^login/$', auth.login, name='login'),
     #url(r'^top/', views.top, name='top'),
-    #url(r'^album/(?P<album>[\w|\W]+)/(?P<artist>[\w|\W]+)/$', views.albumInfo, name='albumInfo'),
-    #url(r'^artist/(?P<artist>[\w|\W]+)/$', views.artistInfo, name='artistInfo'),
+    url(r'^album/(?P<album>[\w|\W]+)/(?P<artist>[\w|\W]+)/$', views.albumInfo, name='albumInfo'),
+    url(r'^artist/(?P<artist>[\w|\W]+)$', views.artistInfo, name='artistInfo'),
 ]

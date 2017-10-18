@@ -1,9 +1,11 @@
+import html
+import re
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from webproj.app.api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, getArtistTopTracksIDURL
-from webproj.app.db.BaseXClient import Session
+from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, getArtistTopTracksIDURL, getArtistTopAlbumsURL, getArtistTopTracksURL
+from ..db.BaseXClient import Session
 
 class Artist:
 
@@ -22,17 +24,21 @@ class Artist:
         self.max_items = max_items
 
         if(self.checkDatabase()):
+            print('Fetching from database')
             self.fetchInfoDatabase()
         else:
+            print('Fetching from API')
             self.fetchInfo()
             self.putInDatabase()
 
-    def checkDatabase(self):
+    def fetchInfoDatabase(self):
+        result = False
         session = Session('localhost', 1984, 'admin', 'admin')
 
         try:
-            query = "let $artists := collection('xpand-db')/artists " + \
-                    "return boolean($artists/artist/name/text() = '" + self.name + "')"
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
+                    "return <result>{$artist}</result>"
 
             queryObj = session.query(query)
 
@@ -42,67 +48,136 @@ class Artist:
 
             queryObj.close()
 
+        except Exception as e:
+            print("fetchInfoDatabase")
+            print("Something failed on XML Database!")
+
         finally:
             if session:
                 session.close()
 
             if result:
+                root = ET.fromstring(result)
+
+                for tag in root.findall('./artist'):
+                    self.name = html.unescape(tag.find('name').text)
+                    self.mbid = tag.find('mbid').text
+                    self.image = tag.find('image').text
+                    self.biographyShort = html.unescape(tag.find('bioShort').text)
+                    self.biographyFull = html.unescape(tag.find('bioFull').text)
+
+                    for artist in tag.findall('similar/artist'):
+                        similar = []
+                        similar.append(html.unescape(artist.find('name').text))
+                        similar.append(artist.find('image').text)
+                        self.similarArtists.append(similar)
+
+                    for topAlbum in tag.findall('topAlbums/topAlbum'):
+                        albumInfo = []
+                        albumInfo.append(html.unescape(topAlbum.find('name').text))
+                        albumInfo.append(topAlbum.find('image').text)
+                        self.topAlbums.append(albumInfo)
+
+                    for topTrack in tag.findall('topTracks/topTrack'):
+                        trackInfo = []
+                        trackInfo.append(html.unescape(topTrack.find('name').text))
+                        trackInfo.append(topTrack.find('image').text)
+                        self.topTracks.append(trackInfo)
+
+                    for tagInfo in tag.findall('tags/tag'):
+                        self.tags.append(tagInfo.text)
+
+
+
+    def checkDatabase(self):
+        result = False
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')/artists " + \
+                    "return boolean($artists/artist/name/text() = '" + self.name + "')"
+
+            queryObj = session.query(query)
+
+            #loop through all results
+            for typecode, item in queryObj.iter():
+                result = item
+
+            queryObj.close()
+
+        except Exception as e:
+            print("exception caught: checkDatabase")
+            print(e)
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+            if result == 'true':
                 return True
             return False
 
     def putInDatabase(self):
+        print("putInDatabase function")
         session = Session('localhost', 1984, 'admin', 'admin')
 
         try:
             query = "let $artists := collection('xpand-db')/artists " + \
                     "let $node := " + \
-                    "<artist> " + \
-                    "   <name>" + self.name + "</name> " + \
-                    "   <mbid>" + self.mbid + "</mbid> " + \
-                    "   <image>" + self.image + "</image> " + \
-                    "   <bioShort>" + self.biographyShort + "</bioShort> " + \
-                    "   <bioFull>" + self.biographyFull + "</bioFull> " + \
-                    "   <similar>"
+                    "<artist>" + \
+                    "<name>" + html.escape(self.name) + "</name>" + \
+                    "<mbid>" + self.mbid + "</mbid>" + \
+                    "<image>" + self.image + "</image>" + \
+                    "<bioShort>" + html.escape(self.biographyShort) + "</bioShort>" + \
+                    "<bioFull>" + html.escape(self.biographyFull) + "</bioFull>" + \
+                    "<similar>"
 
             for similarArtist in self.similarArtists:
-                query += "  <artist> " + \
-                         "      <name>" + similarArtist[0] + "</name> " + \
-                         "      <image>" + similarArtist[1] + "</image> " + \
-                         "  </artist> "
+                query += "<artist>" + \
+                         "<name>" + html.escape(similarArtist[0]) + "</name>" + \
+                         "<image>" + similarArtist[1] + "</image>" + \
+                         "</artist>"
 
-            query += "  </similar> " + \
-                     "  <albums></albums> " + \
-                     "  <topAlbums> "
+            query += "</similar>" + \
+                     "<albums></albums>" + \
+                     "<topAlbums>"
 
             for topAlbum in self.topAlbums:
-                query += "  <topAlbum> " + \
-                         "      <name>" + topAlbum[0] + "</name> " + \
-                         "      <image>" + topAlbum[1] + "</image> " + \
-                         "  </topAlbum> "
+                query += "<topAlbum>" + \
+                         "<name>" + html.escape(topAlbum[0]) + "</name>" + \
+                         "<image>" + topAlbum[1] + "</image>" + \
+                         "</topAlbum>"
 
-            query += "  </topAlbums> " + \
-                     "  <topTracks> "
+            query += "</topAlbums>" + \
+                     "<topTracks>"
 
             for topTrack in self.topTracks:
-                query += "  <topTrack> " + \
-                         "      <name>" + topTrack[0] + "</name> " + \
-                         "      <image>" + topTrack[1] + "</image> " + \
-                         "  </topTrack> "
+                query += "<topTrack>" + \
+                         "<name>" + html.escape(topTrack[0]) + "</name>" + \
+                         "<image>" + topTrack[1] + "</image>" + \
+                         "</topTrack>"
 
-            query += "  </topTracks> " + \
-                     "  <tags> "
+            query += "</topTracks>" + \
+                     "<tags>"
 
             for tag in self.tags:
-                query += "<tag>" + tag + "</tag> "
+                query += "<tag>" + tag + "</tag>"
 
-            query += "  </tags> " + \
+            query += "</tags>" + \
                      "</artist> " + \
                      "return insert node $node into $artists"
 
             queryObj = session.query(query)
-            print(session.info())
+
+            queryObj.execute()
 
             queryObj.close()
+
+        except Exception as e:
+            print("putInDatabase")
+            print(e)
+            print("Something failed on XML Database!")
 
         finally:
             if session:
@@ -111,29 +186,50 @@ class Artist:
     def fetchInfo(self):
         try:
             url = urlopen( getArtistInfoURL(quote(self.name)) )
+            print(getArtistInfoURL(quote(self.name)))
         except HTTPError:
+            print("fetchInfo")
             print('Artist doesn\'t exist!')
         else:
             tree = ET.parse(url)
             root = tree.getroot()
 
             for x in root.findall('artist'):
-                self.biographyShort = x.find('bio/summary').text
-                self.biographyFull = x.find('bio/content').text
-                self.image = x.find('.//image[@size="mega"]').text
-                self.name = x.find('name').text
-                self.mbid = x.find('mbid').text
+                if x.findall('bio/summary'):
+                    txtShort = str(x.find('bio/summary').text)
+                    self.biographyShort = txtShort.split('<a href=')[0]
 
-                for y in x.findall('similar/artist'):
-                    similar = []
-                    similar.append(y.find('name').text)
-                    similar.append(y.find('.//image[@size="mega"]').text)
-                    self.similarArtists.append(similar)
+                if x.findall('bio/content'):
+                    txtFull = str(x.find('bio/content').text)
+                    self.biographyFull = txtFull.split('<a href=')[0]
 
-                for tag in x.findall('tags/tag'):
-                    self.tags.append(tag.find('name').text)
+                if x.findall('.//image[@size="mega"]'):
+                    self.image = x.find('.//image[@size="mega"]').text
 
-            url = urlopen( getArtistTopAlbumsIDURL(self.mbid, self.max_items) )
+                if x.findall('name'):
+                    self.name = x.find('name').text
+
+                if x.findall('mbid'):
+                    self.mbid = x.find('mbid').text
+
+                if x.findall('similar/artist'):
+                    for y in x.findall('similar/artist'):
+                        if y:
+                            similar = []
+                            similar.append(y.find('name').text)
+                            similar.append(y.find('.//image[@size="mega"]').text)
+                            self.similarArtists.append(similar)
+
+                if x.findall('tags/tag'):
+                    for tag in x.findall('tags/tag'):
+                        if tag:
+                            self.tags.append(tag.find('name').text)
+
+            if self.mbid:
+                url = urlopen(getArtistTopAlbumsIDURL(self.mbid, self.max_items))
+            else:
+                url = urlopen( getArtistTopAlbumsURL(self.name, self.max_items) )
+
             tree = ET.parse(url)
             root = tree.getroot()
 
@@ -147,7 +243,11 @@ class Artist:
                 albumInfo.append(albumImage)
                 self.topAlbums.append(albumInfo)
 
-            url = urlopen( getArtistTopTracksIDURL(self.mbid, self.max_items) )
+            if self.mbid:
+                url = urlopen( getArtistTopTracksIDURL(self.mbid, self.max_items) )
+            else:
+                url = urlopen( getArtistTopTracksURL(self.name, self.max_items) )
+
             tree = ET.parse(url)
             root = tree.getroot()
 

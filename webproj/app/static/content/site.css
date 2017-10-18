@@ -1,6 +1,6 @@
 ﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+    padding-top: 40px;
+    padding-bottom: 40px;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -41,14 +41,30 @@ input[type="checkbox"].input-validation-error {
     display: none;
 }
 
-.carousel-inner {
-    width: 120%;
-    margin-left: -10%;
+
+/* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+
+/* Carousel base class */
+.carousel {
+  margin-bottom: 60px;
 }
 
-@media (min-width: 768px) {
-    .carousel-inner {
-        width: 100%;
-        margin: 0;
-    }
+.carousel .container {
+  position: relative;
+  z-index: 9;
+}
+
+.carousel .item {
+  height: 450px;
+}
+.carousel img {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    min-width: 100%;
+    margin: auto;
+    height: 450px;
 }
