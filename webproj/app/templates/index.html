@@ -42,18 +42,68 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-4">
-                <h2>TOP Artists</h2>
+            <div class="col-md-8">
+                <h2>Latest News</h2>
+                <div class="container">
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <img class="img-rounded"" height="110" width="110" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
+                        </div>
+                        <div class="col-sm-8">
+                            <h3 class="media-heading">titulo noticia</h3>
+                            synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopsesynopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse
+                        </div>
+                    </div>
+                    <br>
+                </div>
             </div>
-            <div class="col-sm-4">
-                <h2>TOP Tracks</h2>
-            </div>
-            <div class="col-sm-4">
-                <h2>TOP Tags</h2>
+            <div class="col-md-4">
+                <br><br>
+                <ul class="nav nav-pills nav-justified">
+                    <li role="presentation" class="active" ><a href="#artists" data-toggle="tab">Top Artists</a></li>
+                    <li role="presentation"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
+                </ul>
+                <div class="tab-content clearfix">
+                    <!-- TOP ARTISTAS -->
+                    <div class="tab-pane active" id="artists">
+                        <div class="container">
+                            <br>
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <img class="img-circle" height="75" width="75" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
+                                </div>
+                                <div class="col-sm-8">
+                                    <h3 class="media-heading">titulo artista</h3>
+                                    tags
+                                </div>
+                            </div>
+                            <br>
+
+                        </div>
+				    </div>
+                    <!-- TOP TRACKS -->
+                    <div class="tab-pane" id="albums">
+                        <div class="container">
+                            <br>
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <img class="img-rounded" height="70" width="70" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
+                                </div>
+                                <div class="col-sm-8">
+                                    <h3 class="media-heading">titulo track</h3>
+                                    by Artista
+                                </div>
+                            </div>
+                            <br>
+
+                        </div>
+				    </div>
+                </div>
             </div>
         </div>
-
-        <p>Use this area to provide additional information.</p>
     </div>
 
 {% endblock %}
