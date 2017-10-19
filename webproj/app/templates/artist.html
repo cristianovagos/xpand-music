@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section>
+    <div class="container" style="padding-top: 40px;">
+        <div class="row">
+            <ol class="breadcrumb">
+                <li>Artist</li>
+                <li class="active"><a href="/artist/{{ name }}">{{ name }}</a></li>
+            </ol>
+        </div>
+        <br>
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <img class="img-circle" src="{{ image }}">
+            </div>
+            <div class="col-md-7">
+                <h1>{{ name }}</h1>
+                <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                {% for tag in tags %}
+                    <a href="#"><span class="label label-info">{{ tag }}</span></a>
+                {% endfor %}
+                <br><br>
+                <p>{{ summary }}</p>
+            </div>
+            <br>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-4"><h4>Top Albums</h4>
+            <ul>
+            {% for x in top5 %}
+                <br>
+                <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> <a href="/album/{{ name }}/{{ x.0 }}"> {{ x.0 }}</a>
+                <br>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="col-sm-4" align="left"><h4>Top Songs</h4>
+            <ul>
+            {% for x in songs5 %}
+                <br>
+                <img class="img-rounded" src="{{ x.1 }}" height="84" width="84">
+                {{ x.0 }}
+                <br>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="col-sm-4" align="left"><h4>Related</h4>
+           {% for x in similars %}
+                <br>
+                <img class="img-circle" src="{{ x.1 }}" height="84" width="84">
+                <a href="/artist/{{ x.0 }}"> {{ x.0 }}</a>
+                <br>
+           {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

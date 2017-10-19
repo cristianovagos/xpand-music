@@ -20,17 +20,31 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="/" class="navbar-brand" style="font-family: 'Righteous', cursive;">
+                <a href="{% url 'home' %}" class="navbar-brand" style="font-family: 'Righteous', cursive;">
                     <img src="{% static 'images/panda.png' %}" width="24" height="24">
                     xPand
                 </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="">News</a></li>
+                    <li><a href="">Artists</a></li>
+                    <li><a href="">Albums</a></li>
+                    <li><a href="">Tracks</a></li>
                     <li><a href="{% url 'about' %}">Playlists</a></li>
                 </ul>
                 {% include 'loginpartial.html' %}
+
+                <div class="col-sm-3 col-md-3 navbar-right">
+                    <form class="navbar-form" role="search">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search..." name="q">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

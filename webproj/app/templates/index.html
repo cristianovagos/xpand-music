@@ -58,49 +58,56 @@
                     <br>
                 </div>
             </div>
-            <div class="col-md-4">
-                <br><br>
-                <ul class="nav nav-pills nav-justified">
-                    <li role="presentation" class="active" ><a href="#artists" data-toggle="tab">Top Artists</a></li>
-                    <li role="presentation"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
-                </ul>
-                <div class="tab-content clearfix">
-                    <!-- TOP ARTISTAS -->
-                    <div class="tab-pane active" id="artists">
-                        <div class="container">
-                            <br>
-
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <img class="img-circle" height="75" width="75" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
-                                </div>
-                                <div class="col-sm-8">
-                                    <h3 class="media-heading">titulo artista</h3>
-                                    tags
-                                </div>
+            <div class="col-md-4 panel panel-default">
+{#                <ul class="nav nav-pills nav-justified">#}
+                <div class="nav panel-tabs">
+                    <ul class="panel-heading nav nav-pills nav-justified">
+                        <li role="presentation" class="active" ><a href="#artists" data-toggle="tab">Top Artists</a></li>
+                        <li role="presentation"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
+                    </ul>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content clearfix">
+                        <!-- TOP ARTISTAS -->
+                        <div class="tab-pane panel-body active" id="artists">
+                            <div class="container" style="padding-left: 5px; padding-right: 5px;">
+                                {% for artista in topArtists %}
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <img class="img-circle" height="60" width="60" src="{{ artista.1 }}" alt="">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <br>
+                                            <a href="/artist/{{ artista.0 }}">
+                                                <h4 class="media-heading">{{ artista.0 }}</h4>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                            <br>
-
                         </div>
-				    </div>
-                    <!-- TOP TRACKS -->
-                    <div class="tab-pane" id="albums">
-                        <div class="container">
-                            <br>
-
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <img class="img-rounded" height="70" width="70" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
-                                </div>
-                                <div class="col-sm-8">
-                                    <h3 class="media-heading">titulo track</h3>
-                                    by Artista
-                                </div>
+                        <!-- TOP TRACKS -->
+                        <div class="tab-pane" id="albums">
+                            <div class="container">
+                                {% for track in topTracks %}
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <img class="img-rounded" height="60" width="60" src="{{ track.2 }}" alt="">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <h3 class="media-heading">{{ track.1 }}</h3>
+                                            by
+                                            <a href="/artist/{{ track.0 }}">
+                                                {{ track.0 }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                            <br>
-
                         </div>
-				    </div>
+                    </div>
                 </div>
             </div>
         </div>

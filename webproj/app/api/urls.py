@@ -171,7 +171,7 @@ def getArtistSearchURL(artist, limit=None, page=None):
 # limit: number of results to fetch per page
 # page: page number to fetch
 
-def getTopArtistsURL(limit=None, page=None):
+def getTopArtistsURL(limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -186,7 +186,7 @@ def getTopArtistsURL(limit=None, page=None):
         return getBaseURL() + "chart.gettopartists" + getAPIKeyText() + "&page=" + str(page)
     return getBaseURL() + "chart.gettopartists" + getAPIKeyText()
 
-def getTopTagsURL(limit=None, page=None):
+def getTopTagsURL(limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -201,7 +201,7 @@ def getTopTagsURL(limit=None, page=None):
         return getBaseURL() + "chart.gettoptags" + getAPIKeyText() + "&page=" + str(page)
     return getBaseURL() + "chart.gettoptags" + getAPIKeyText()
 
-def getTopTracksURL(limit=None, page=None):
+def getTopTracksURL(limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')

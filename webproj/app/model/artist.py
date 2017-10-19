@@ -1,10 +1,10 @@
 import html
-import re
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, getArtistTopTracksIDURL, getArtistTopAlbumsURL, getArtistTopTracksURL
+from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, \
+    getArtistTopTracksIDURL, getArtistTopAlbumsURL, getArtistTopTracksURL
 from ..db.BaseXClient import Session
 
 class Artist:
@@ -12,7 +12,7 @@ class Artist:
     def __init__(self, name, max_items=5):
         self.name = name
         self.mbid = None
-        self.image = None
+        self.image = "http://paradeal.pp.ua/img/no-user.jpg"
         self.biographyShort = None
         self.biographyFull = None
         self.similarArtists = []
@@ -23,7 +23,13 @@ class Artist:
 
         self.max_items = max_items
 
-        if(self.checkDatabase()):
+        self.noArtistImage = "http://paradeal.pp.ua/img/no-user.jpg"
+        self.noAlbumImage = self.noTrackImage = "https://www.shareicon.net/data/2015/07/09/66681_music_512x512.png"
+        self.noBioText = "Artist Biography not available, sorry."
+
+        self.artistExists = True
+
+        if self.checkDatabase():
             print('Fetching from database')
             self.fetchInfoDatabase()
         else:
@@ -60,33 +66,82 @@ class Artist:
                 root = ET.fromstring(result)
 
                 for tag in root.findall('./artist'):
-                    self.name = html.unescape(tag.find('name').text)
-                    self.mbid = tag.find('mbid').text
-                    self.image = tag.find('image').text
-                    self.biographyShort = html.unescape(tag.find('bioShort').text)
-                    self.biographyFull = html.unescape(tag.find('bioFull').text)
+                    if tag.findall('name'):
+                        self.name = html.unescape(tag.find('name').text)
 
-                    for artist in tag.findall('similar/artist'):
-                        similar = []
-                        similar.append(html.unescape(artist.find('name').text))
-                        similar.append(artist.find('image').text)
-                        self.similarArtists.append(similar)
+                    if tag.findall('mbid'):
+                        self.mbid = tag.find('mbid').text
 
-                    for topAlbum in tag.findall('topAlbums/topAlbum'):
-                        albumInfo = []
-                        albumInfo.append(html.unescape(topAlbum.find('name').text))
-                        albumInfo.append(topAlbum.find('image').text)
-                        self.topAlbums.append(albumInfo)
+                    if tag.findall('image'):
+                        self.image = tag.find('image').text
 
-                    for topTrack in tag.findall('topTracks/topTrack'):
-                        trackInfo = []
-                        trackInfo.append(html.unescape(topTrack.find('name').text))
-                        trackInfo.append(topTrack.find('image').text)
-                        self.topTracks.append(trackInfo)
+                    if tag.findall('bioShort'):
+                        self.biographyShort = html.unescape(tag.find('bioShort').text)
+                    else:
+                        self.biographyShort = self.noBioText
 
-                    for tagInfo in tag.findall('tags/tag'):
-                        self.tags.append(tagInfo.text)
+                    if tag.findall('bioFull'):
+                        self.biographyFull = html.unescape(tag.find('bioFull').text)
+                    else:
+                        self.biographyFull = self.noBioText
 
+                    if tag.findall('similar/artist'):
+                        for artist in tag.findall('similar/artist'):
+                            if artist:
+                                similar = []
+
+                                if artist.findall('name'):
+                                    similar.append(html.unescape(artist.find('name').text))
+                                else:
+                                    continue
+
+                                if artist.findall('image'):
+                                    if artist.find('image').text != None:
+                                        similar.append(artist.find('image').text)
+                                    else:
+                                        similar.append(self.noArtistImage)
+
+                                self.similarArtists.append(similar)
+
+                    if tag.findall('topAlbums/topAlbum'):
+                        for topAlbum in tag.findall('topAlbums/topAlbum'):
+                            if topAlbum:
+                                albumInfo = []
+
+                                if topAlbum.findall('name'):
+                                    albumInfo.append(html.unescape(topAlbum.find('name').text))
+                                else:
+                                    continue
+
+                                if topAlbum.findall('image'):
+                                    if topAlbum.find('image').text != None:
+                                        albumInfo.append(topAlbum.find('image').text)
+                                    else:
+                                        albumInfo.append(self.noAlbumImage)
+
+                                self.topAlbums.append(albumInfo)
+
+                    if tag.findall('topTracks/topTrack'):
+                        for topTrack in tag.findall('topTracks/topTrack'):
+                            if topTrack:
+                                trackInfo = []
+
+                                if topTrack.findall('name'):
+                                    trackInfo.append(html.unescape(topTrack.find('name').text))
+                                else:
+                                    continue
+
+                                if topTrack.findall('image'):
+                                    trackInfo.append(topTrack.find('image').text)
+                                else:
+                                    trackInfo.append(self.noTrackImage)
+
+                                self.topTracks.append(trackInfo)
+
+                    if tag.findall('tags/tag'):
+                        for tagInfo in tag.findall('tags/tag'):
+                            if tagInfo:
+                                self.tags.append(tagInfo.text)
 
 
     def checkDatabase(self):
@@ -186,25 +241,47 @@ class Artist:
     def fetchInfo(self):
         try:
             url = urlopen( getArtistInfoURL(quote(self.name)) )
-            print(getArtistInfoURL(quote(self.name)))
         except HTTPError:
-            print("fetchInfo")
             print('Artist doesn\'t exist!')
+            self.artistExists = False
         else:
             tree = ET.parse(url)
             root = tree.getroot()
 
             for x in root.findall('artist'):
                 if x.findall('bio/summary'):
-                    txtShort = str(x.find('bio/summary').text)
-                    self.biographyShort = txtShort.split('<a href=')[0]
+                    if x.find('bio/summary').text != None:
+                        txtShort = str(x.find('bio/summary').text)
+                        txtShort = txtShort.split('<a href=')[0]
+
+                        if len(txtShort) < 5:
+                            self.biographyShort = self.noBioText
+                        else:
+                            self.biographyShort = txtShort
+                    else:
+                        self.biographyShort = self.noBioText
+                else:
+                    self.biographyShort = self.noBioText
 
                 if x.findall('bio/content'):
-                    txtFull = str(x.find('bio/content').text)
-                    self.biographyFull = txtFull.split('<a href=')[0]
+                    if x.find('bio/content').text != None:
+                        txtFull = str(x.find('bio/content').text)
+                        txtFull = txtFull.split('<a href=')[0]
+
+                        if len(txtFull) < 5:
+                            self.biographyFull = self.noBioText
+                        else:
+                            self.biographyFull = txtFull
+                    else:
+                        self.biographyFull = self.noBioText
+                else:
+                    self.biographyFull = self.noBioText
 
                 if x.findall('.//image[@size="mega"]'):
-                    self.image = x.find('.//image[@size="mega"]').text
+                    if x.find('.//image[@size="mega"]').text != None:
+                        self.image = x.find('.//image[@size="mega"]').text
+                    else:
+                        self.image = self.noArtistImage
 
                 if x.findall('name'):
                     self.name = x.find('name').text
@@ -216,8 +293,18 @@ class Artist:
                     for y in x.findall('similar/artist'):
                         if y:
                             similar = []
-                            similar.append(y.find('name').text)
-                            similar.append(y.find('.//image[@size="mega"]').text)
+
+                            if y.findall('name'):
+                                similar.append(y.find('name').text)
+                            else:
+                                continue
+
+                            if y.findall('.//image[@size="mega"]'):
+                                if y.find('.//image[@size="mega"]').text != None:
+                                    similar.append(y.find('.//image[@size="mega"]').text)
+                                else:
+                                    similar.append(self.noArtistImage)
+
                             self.similarArtists.append(similar)
 
                 if x.findall('tags/tag'):
@@ -233,15 +320,23 @@ class Artist:
             tree = ET.parse(url)
             root = tree.getroot()
 
-            for album in root.findall('topalbums/album'):
-                albumInfo = []
+            if root.findall('topalbums/album'):
+                for album in root.findall('topalbums/album'):
+                    if album:
+                        albumInfo = []
 
-                albumName = album.find('name').text
-                albumImage = album.find('.//image[@size="extralarge"]').text
+                        if album.findall('name'):
+                            albumInfo.append(album.find('name').text)
+                        else:
+                            continue
 
-                albumInfo.append(albumName)
-                albumInfo.append(albumImage)
-                self.topAlbums.append(albumInfo)
+                        if album.findall('.//image[@size="extralarge"]'):
+                            if album.find('.//image[@size="extralarge"]').text != None:
+                                albumInfo.append(album.find('.//image[@size="extralarge"]').text)
+                            else:
+                                albumInfo.append(self.noAlbumImage)
+
+                        self.topAlbums.append(albumInfo)
 
             if self.mbid:
                 url = urlopen( getArtistTopTracksIDURL(self.mbid, self.max_items) )
@@ -251,16 +346,30 @@ class Artist:
             tree = ET.parse(url)
             root = tree.getroot()
 
-            for track in root.findall('toptracks/track'):
-                trackInfo = []
+            if root.findall('toptracks/track'):
+                for track in root.findall('toptracks/track'):
+                    if track:
+                        trackInfo = []
 
-                trackName = track.find('name').text
-                trackImage = track.find('.//image[@size="extralarge"]').text
+                        if track.findall('name'):
+                            trackName = track.find('name').text
+                        else:
+                            continue
 
-                trackInfo.append(trackName)
-                trackInfo.append(trackImage)
-                self.topTracks.append(trackInfo)
+                        if track.findall('.//image[@size="extralarge"]'):
+                            trackImage = track.find('.//image[@size="extralarge"]').text
+                        else:
+                            trackImage = self.noTrackImage
 
+                        trackInfo.append(trackName)
+                        trackInfo.append(trackImage)
+                        self.topTracks.append(trackInfo)
+
+    def exists(self):
+        return self.artistExists
+
+    def getTags(self):
+        return self.tags
 
     def getName(self):
         return self.name

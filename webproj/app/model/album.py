@@ -4,6 +4,7 @@ from urllib.parse import quote
 from urllib.request import urlopen
 from urllib.error import HTTPError
 #from webproj.app.model.track import Track
+from ..model.artist import Artist
 from ..api.urls import getAlbumInfoURL, getAlbumInfoIDURL
 from ..db.BaseXClient import Session
 
@@ -18,6 +19,11 @@ class Album:
         self.tags = []
         self.wikiTextShort = None
         self.wikiTextFull = None
+
+        self.noAlbumImage = self.noTrackImage = "https://www.shareicon.net/data/2015/07/09/66681_music_512x512.png"
+        self.noWikiText = "Sorry, no wiki available for this album."
+
+        self.albumExists = True
 
         if (self.checkDatabase()):
             print('Fetching from database')
@@ -56,16 +62,20 @@ class Album:
                 root = ET.fromstring(result)
 
                 for tag in root.findall('./album'):
-                    self.name = html.unescape(tag.find('name').text)
-                    self.mbid = tag.find('mbid').text
-                    self.image = tag.find('image').text
+                    if tag.findall('name'):
+                        self.name = html.unescape(tag.find('name').text)
+
+                    if tag.findall('mbid'):
+                        self.mbid = tag.find('mbid').text
+
+                    if tag.findall('image'):
+                        self.image = tag.find('image').text
+
                     self.wikiTextShort = html.unescape(tag.find('wikiShort').text)
                     self.wikiTextFull = html.unescape(tag.find('wikiFull').text)
 
                     for track in tag.findall('tracks/track'):
-                        trackInfo = []
-                        trackInfo.append(html.unescape(track.find('name').text))
-                        self.tracks.append(trackInfo)
+                        self.tracks.append(html.unescape(track.find('name').text))
 
                     for tagInfo in tag.findall('tags/tag'):
                         self.tags.append(tagInfo.text)
@@ -74,6 +84,21 @@ class Album:
         session = Session('localhost', 1984, 'admin', 'admin')
 
         try:
+            result = None
+            query = "let $artists := collection('xpand-db')/artists " + \
+                    "return boolean($artists/artist/name/text() = '" + self.name + "')"
+
+            queryObj = session.query(query)
+
+            # loop through all results
+            for typecode, item in queryObj.iter():
+                result = item
+
+            queryObj.close()
+
+            if result == 'false':
+                Artist(self.artist)
+
             query = "let $artists := collection('xpand-db')//artist " + \
                     "let $insertpath := $artists[name='" + self.artist + "']/albums " + \
                     "let $node := " + \
@@ -108,6 +133,7 @@ class Album:
 
         except Exception as e:
             print("Something failed on XML Database!")
+            print(e)
 
         finally:
             if session:
@@ -134,6 +160,7 @@ class Album:
 
         except Exception as e:
             print("Something failed on XML Database!")
+            print(e)
 
         finally:
             if session:
@@ -151,25 +178,69 @@ class Album:
                 url = urlopen( getAlbumInfoURL(quote(self.artist), quote(self.name)) )
         except HTTPError:
             print('Album doesn\'t exist!')
+            self.albumExists = False
         else:
             tree = ET.parse(url)
             root = tree.getroot()
 
             for x in root.findall('album'):
-                self.name = x.find('name').text
-                self.mbid = x.find('mbid').text
-                self.image = x.find('.//image[@size="mega"]').text
-                self.wikiTextShort = x.find('wiki/summary').text
-                self.wikiTextFull = x.find('wiki/content').text
+                if x:
+                    if x.findall('name'):
+                        self.name = x.find('name').text
 
-                for track in x.findall('tracks/track'):
-                    trackName = track.find('name').text
-                    self.tracks.append(trackName)
-                    #self.tracks.append(Track(self.artist, trackName))
+                    if x.findall('mbid'):
+                        self.mbid = x.find('mbid').text
 
-                for tag in x.findall('tags/tag'):
-                    tagText = tag.find('name').text
-                    self.tags.append(tagText)
+                    if x.findall('.//image[@size="mega"]'):
+                        self.image = x.find('.//image[@size="mega"]').text
+                    else:
+                        self.image = self.noAlbumImage
+
+                    if x.findall('wiki/summary'):
+                        if x.find('wiki/summary').text != None:
+                            txtShort = str(x.find('wiki/summary').text)
+                            txtShort = txtShort.split('<a href=')[0]
+
+                            if len(txtShort) < 5:
+                                self.wikiTextShort = self.noWikiText
+                            else:
+                                self.wikiTextShort = txtShort
+                        else:
+                            self.wikiTextShort = self.noWikiText
+                    else:
+                        self.wikiTextShort = self.noWikiText
+
+
+                    if x.findall('wiki/content'):
+                        if x.find('wiki/content').text != None:
+                            txtFull = str(x.find('wiki/content').text)
+                            txtFull = txtFull.split('<a href=')[0]
+
+                            if len(txtFull) < 5:
+                                self.wikiTextFull = self.noWikiText
+                            else:
+                                self.wikiTextFull = txtFull
+                        else:
+                            self.wikiTextFull = self.noWikiText
+                    else:
+                        self.wikiTextFull = self.noWikiText
+
+                    if x.findall('tracks/track'):
+                        for track in x.findall('tracks/track'):
+                            if track:
+                                if track.find('name').text:
+                                    trackName = track.find('name').text
+                                    self.tracks.append(trackName)
+                                    #self.tracks.append(Track(self.artist, trackName))
+
+                    if x.findall('tags/tag'):
+                        for tag in x.findall('tags/tag'):
+                            if tag:
+                                if tag.find('name').text:
+                                    tagText = tag.find('name').text
+                                    self.tags.append(tagText)
+    def exists(self):
+        return self.albumExists
 
     def getName(self):
         return self.name

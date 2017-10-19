@@ -68,3 +68,11 @@ input[type="checkbox"].input-validation-error {
     margin: auto;
     height: 450px;
 }
+
+/**/
+
+.panel-body {
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}

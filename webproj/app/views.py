@@ -6,6 +6,8 @@ from .model.artist import Artist
 from .model.album import Album
 from django.http import HttpRequest
 from django.shortcuts import render
+from .api.artists.artists import getTopArtists
+from .api.tracks.tracks import getTopTracks
 
 #from webproj.app.api.artists.artists import getArtistInfo
 
@@ -15,10 +17,16 @@ from django.shortcuts import render
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
+
+    topArtists = getTopArtists()
+    topTracks = getTopTracks()
+
     tparams = {
         'title':'xPand',
         'message':'Your indexx page.',
         'year':datetime.now().year,
+        'topArtists' : topArtists,
+        'topTracks': topTracks
     }
     return render(request, 'index.html', tparams)
 
@@ -95,16 +103,17 @@ def albumInfo(request, album, artist):
         'artist': artist,
         'year': datetime.now().year,
         'image': albumObj.getImage(),
-        'dict': albumObj.getTracks(),
+        'wiki': albumObj.getWikiShort(),
+        'tags': albumObj.getTags(),
+        'tracks': albumObj.getTracks(),
         'title': album,
     }
-    return render(request, 'albumInfo.html', tparams)
+    return render(request, 'album.html', tparams)
 
 def artistInfo(request, artist):
     assert isinstance(request, HttpRequest)
 
     artistObj = Artist(artist)
-    print(artistObj)
 
     tparams = {
         'summary': artistObj.getBiography(True),
@@ -115,7 +124,8 @@ def artistInfo(request, artist):
         'topAlbums': artistObj.getTopAlbums(),
         'top5': artistObj.getTopAlbums(),
         'songs5': artistObj.getTopTracks(),
-        'title': artistObj.getName()
+        'title': artistObj.getName(),
+        'tags' : artistObj.getTags()
     }
 
-    return render(request, 'artistInfo.html', tparams)
+    return render(request, 'artist.html', tparams)
