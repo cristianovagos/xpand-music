@@ -15,3 +15,4 @@ def getTopAlbums(artist):
         result.append(aux)
     return result
 
+

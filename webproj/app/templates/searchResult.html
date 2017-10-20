@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container">
+    <br>
+        <div class="row">
+            <div class="col-md-8">
+                <h1>Search Result</h1>
+                <div class="container">
+                    {% if lenArtistSearch != 0 %}
+                    <h2>Artists & Tracks</h2>
+                    <!--   INSERT FOR HERE   artistas-->
+                    {% for x in artistSearch %}
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <a href="/artist/{{ x.name }}" style="color:black"><img class="img-circle" height="100" width="100" src="{{ x.image }}" alt=""></a>
+                        </div>
+                        <div class="col-sm">
+                            <br>
+                            <a href="/artist/{{ x.name }}" style="color:black"><h4>{{ x.name }}</h4></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <br>
+                    {% endif %}
+                    {% if lenAlbumSearch != 0 %}
+                    <h2>Albums</h2>
+                    <!--   INSERT FOR HERE   artistas-->
+                    {% for y in albumSearch %}
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <a href="/album/{{ y.artist }}/{{ y.name }}" style="color:black"><img class="img-rounded" height="100" width="100" src="{{ y.image }}" alt=""></a>
+                        </div>
+                        <div class="col-sm">
+                            <br>
+                            <a href="/album/{{ y.artist }}/{{ y.name }}" style="color:black"><h4>{{ y.name }}</h4></a> by <a href="/artist/{{ y.artist }}" style="color:black">{{ y.artist }}</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <br>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

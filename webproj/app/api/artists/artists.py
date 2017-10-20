@@ -3,8 +3,6 @@ from urllib.request import urlopen
 from ..urls import getTopArtistsURL
 
 def getTopArtists(num=5, page=1):
-    print(getTopArtistsURL(num, page))
-
     file = urlopen(getTopArtistsURL(num, page))
     tree = ET.parse(file)
     root = tree.getroot()
@@ -16,3 +14,5 @@ def getTopArtists(num=5, page=1):
         aux.append(x.find('image[@size="extralarge"]').text)
         result.append(aux)
     return result
+
+

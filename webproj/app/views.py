@@ -7,6 +7,7 @@ from .model.album import Album
 from django.http import HttpRequest
 from django.shortcuts import render
 from .api.artists.artists import getTopArtists
+from .api.searchs.search import searchArtist, searchAlbum
 from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
 
@@ -144,3 +145,19 @@ def news(request):
 
     }
     return render(request, 'news.html', tparams)
+
+def searchResult(request):
+    assert isinstance(request, HttpRequest)
+
+    searching = "carreira"
+
+    artistSearch = searchArtist(searching)
+    albumSearch = searchAlbum(searching)
+
+    tparams = {
+        'artistSearch'   : artistSearch,
+        'lenArtistSearch': len(artistSearch),
+        'albumSearch'    : albumSearch,
+        'lenAlbumSearch' : len(albumSearch),
+    }
+    return render(request, 'searchResult.html', tparams)

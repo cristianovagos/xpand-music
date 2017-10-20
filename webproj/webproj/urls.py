@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^album/(?P<artist>[\w|\W]+)/(?P<album>[\w|\W]+)/$', views.albumInfo, name='albumInfo'),
     url(r'^artist/(?P<artist>[\w|\W]+)$', views.artistInfo, name='artistInfo'),
     url(r'^news/', views.news, name='news'),
+    url(r'^searchResult/', views.searchResult, name='searchResult'),
 ]
