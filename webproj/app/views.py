@@ -8,6 +8,7 @@ from django.http import HttpRequest
 from django.shortcuts import render
 from .api.artists.artists import getTopArtists
 from .api.tracks.tracks import getTopTracks
+from .api.news.news import *
 
 #from webproj.app.api.artists.artists import getArtistInfo
 
@@ -26,7 +27,8 @@ def home(request):
         'message':'Your indexx page.',
         'year':datetime.now().year,
         'topArtists' : topArtists,
-        'topTracks': topTracks
+        'topTracks': topTracks,
+        'news': getAllNews(5),
     }
     return render(request, 'index.html', tparams)
 
@@ -125,7 +127,20 @@ def artistInfo(request, artist):
         'top5': artistObj.getTopAlbums(),
         'songs5': artistObj.getTopTracks(),
         'title': artistObj.getName(),
-        'tags' : artistObj.getTags()
+        'tags' : artistObj.getTags(),
+        'news': getArtistNews(5, str(artistObj.getName())),
+        'lengthNews': len(getArtistNews(5, str(artistObj.getName()))),
     }
 
     return render(request, 'artist.html', tparams)
+
+def news(request):
+    assert isinstance(request, HttpRequest)
+
+    news = getAllNews()
+
+    tparams = {
+        'news' : news,
+
+    }
+    return render(request, 'news.html', tparams)

@@ -43,21 +43,24 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <h2>Latest News</h2>
+                <a href="/news" style="color:black" ><h2>Latest News</h2></a>
+                {% for x in news %}
                 <div class="container">
                     <br>
                     <div class="row">
                         <div class="col-sm-2">
-                            <img class="img-rounded"" height="110" width="110" src="https://lastfm-img2.akamaized.net/i/u/300x300/511709bfa7284c8acca33ca39a4ec176.png" alt="">
+                            <a href="{{ x.link }}"><img class="img-rounded" height="110" width="110" src="{{ x.image }}" alt=""></a>
                         </div>
                         <div class="col-sm-8">
-                            <h3 class="media-heading">titulo noticia</h3>
-                            synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopsesynopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse synopse
+                            <h3 class="media-heading"><a href="{{ x.link }}" style="color:black">{{ x.title }}</a></h3>
+                            {{ x.description }}
                         </div>
                     </div>
                     <br>
                 </div>
+                {%endfor%}
             </div>
+        <br>
             <div class="col-md-4 panel panel-default">
 {#                <ul class="nav nav-pills nav-justified">#}
                 <div class="nav panel-tabs">
@@ -79,7 +82,7 @@
                                         </div>
                                         <div class="col-sm-8">
                                             <br>
-                                            <a href="/artist/{{ artista.0 }}">
+                                            <a href="/artist/{{ artista.0 }}" style="color:black">
                                                 <h4 class="media-heading">{{ artista.0 }}</h4>
                                             </a>
                                         </div>

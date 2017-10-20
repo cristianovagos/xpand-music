@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <div class="container">
+    <br>
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Latest News</h2>
+                <div class="container">
+                    <!--   INSERT FOR HERE   NEWS-->
+                    {% for x in news %}
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <img class="img-rounded" height="95" width="95" src="{{ x.image }}" alt="">
+                        </div>
+                        <div class="col-sm">
+                            <a href="{{ x.link }}" style="color:black"><h4 class="media-heading">{{ x.title }}</h4></a>
+                            {{ x.description }}
+                            <h6>Source: {{ x.author }} ({{ x.pubDate }})</h6>
+
+                        </div>
+                    </div>
+                    <br>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
