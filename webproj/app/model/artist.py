@@ -141,8 +141,7 @@ class Artist:
 
                     if tag.findall('tags/tag'):
                         for tagInfo in tag.findall('tags/tag'):
-                            if tagInfo:
-                                self.tags.append(tagInfo.text)
+                            self.tags.append(tagInfo.text)
 
                     if tag.findall('comments/comment'):
                         for comment in tag.findall('comments/comment'):
@@ -519,5 +518,7 @@ class Artist:
             string += '\n\t' + 'Top Albums: '+ str(self.topAlbums)
         if self.topTracks:
             string += '\n\t' + 'Top Tracks: ' + str(self.topTracks)
+        if self.tags:
+            string += '\n\t' + 'Tags: ' + str(self.tags)
 
         return string
