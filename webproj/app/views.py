@@ -11,7 +11,7 @@ from .api.searchs.search import searchArtist, searchAlbum
 from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
 from .forms import SearchForm, CommentForm
-
+from .api.tags.tags import *
 #from webproj.app.api.artists.artists import getArtistInfo
 
 
@@ -153,3 +153,17 @@ def searchResult(request):
         return render(request, 'searchResult.html', tparams)
     else:
         return render(request, 'searchResult.html', {'form' : SearchForm()})
+
+def top(request):
+    assert isinstance(request, HttpRequest)
+
+    artists = []
+    tags =  topGenresArtists()
+    for tag in tags:
+        artists.append(getTagTopArtists(tag))
+
+    tparams = {
+        'topArtists' : artists,
+        'tags'       : tags,
+    }
+    return render(request, 'top.html', tparams)
