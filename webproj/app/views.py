@@ -10,6 +10,7 @@ from .api.artists.artists import getTopArtists
 from .api.searchs.search import searchArtist, searchAlbum
 from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
+from .api.tags.tags import *
 
 #from webproj.app.api.artists.artists import getArtistInfo
 
@@ -60,39 +61,6 @@ def about(request):
             'year': datetime.now().year,
         }
     )
-
-                                                ### criadas ###
-# top musicas atualmente tag = rap,  esta static ainda   &tag= ...
-#def top(request):
-    # """Renders the list page."""
-    # assert isinstance(request, HttpRequest)
-    #
-    # file = urlopen(
-    #     "http://ws.audioscrobbler.com/2.0/?method=tag.gettopalbums&tag=rap&api_key=32f8947b156b3993b3ff9159b81f4667")
-    # tree = ET.parse(file)
-    # root = tree.getroot()
-    # result = []
-    #
-    # for x in root.findall('albums'):
-    #     for y in x.findall('album'):
-    #         aux = []
-    #         nomeAlbum = y.find('name').text
-    #         for ar in y.findall('artist'):
-    #             nomeArtista = ar.find('name').text
-    #             mbid = ar.find('mbid').text
-    #             aux.append(nomeAlbum)
-    #             aux.append(nomeArtista)
-    #             aux.append(mbid)
-    #         img = y.find('.//image[@size="large"]').text
-    #         aux.append(img)
-    #         result.append(aux)
-    #
-    # tparams = {
-    #     'title':'TOP Categorias',
-    #     'year':datetime.now().year,
-    #     'array' :result,
-    # }
-    # return render(request, 'top.html', tparams)
 
 
 def albumInfo(request, album, artist):
@@ -161,3 +129,17 @@ def searchResult(request):
         'lenAlbumSearch' : len(albumSearch),
     }
     return render(request, 'searchResult.html', tparams)
+
+def top(request):
+    assert isinstance(request, HttpRequest)
+
+    artists = []
+    tags =  topGenresArtists()
+    for tag in tags:
+        artists.append(getTagTopArtists(tag))
+
+    tparams = {
+        'topArtists' : artists,
+        'tags'       : tags,
+    }
+    return render(request, 'top.html', tparams)

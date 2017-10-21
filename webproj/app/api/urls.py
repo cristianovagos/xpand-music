@@ -114,7 +114,7 @@ def getArtistTopAlbumsIDURL(mbid, limit=None, page=None):
         return getBaseURL() + "artist.gettopalbums" + getAPIKeyText() + "&mbid=" + mbid + "&page=" + str(page)
     return getBaseURL() + "artist.gettopalbums" + getAPIKeyText() + "&mbid=" + mbid
 
-def getArtistTopAlbumsURL(artist, limit=None, page=None):
+def getArtistTopAlbumsURL(artist, limit=10, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')

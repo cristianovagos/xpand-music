@@ -27,11 +27,9 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{% url 'news' %}">News</a></li>
-                    <li><a href="">Artists</a></li>
-                    <li><a href="">Albums</a></li>
-                    <li><a href="">Tracks</a></li>
-                    <li><a href="{% url 'about' %}">Playlists</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'news' %}">Latest News</a></li>
+                    <li><a href="{% url 'top' %}">Top Artists</a></li>
                 </ul>
                 {% include 'loginpartial.html' %}
 
