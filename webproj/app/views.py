@@ -5,11 +5,12 @@ from urllib.request import urlopen
 from .model.artist import Artist
 from .model.album import Album
 from django.http import HttpRequest
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .api.artists.artists import getTopArtists
 from .api.searchs.search import searchArtist, searchAlbum
 from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
+from .forms import SearchForm, CommentForm
 
 #from webproj.app.api.artists.artists import getArtistInfo
 
@@ -20,16 +21,14 @@ def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
 
-    topArtists = getTopArtists()
-    topTracks = getTopTracks()
-
     tparams = {
         'title':'xPand',
         'message':'Your indexx page.',
         'year':datetime.now().year,
-        'topArtists' : topArtists,
-        'topTracks': topTracks,
+        'topArtists' : getTopArtists(),
+        'topTracks': getTopTracks(),
         'news': getAllNews(5),
+        'form': SearchForm()
     }
     return render(request, 'index.html', tparams)
 
@@ -61,45 +60,18 @@ def about(request):
         }
     )
 
-                                                ### criadas ###
-# top musicas atualmente tag = rap,  esta static ainda   &tag= ...
-#def top(request):
-    # """Renders the list page."""
-    # assert isinstance(request, HttpRequest)
-    #
-    # file = urlopen(
-    #     "http://ws.audioscrobbler.com/2.0/?method=tag.gettopalbums&tag=rap&api_key=32f8947b156b3993b3ff9159b81f4667")
-    # tree = ET.parse(file)
-    # root = tree.getroot()
-    # result = []
-    #
-    # for x in root.findall('albums'):
-    #     for y in x.findall('album'):
-    #         aux = []
-    #         nomeAlbum = y.find('name').text
-    #         for ar in y.findall('artist'):
-    #             nomeArtista = ar.find('name').text
-    #             mbid = ar.find('mbid').text
-    #             aux.append(nomeAlbum)
-    #             aux.append(nomeArtista)
-    #             aux.append(mbid)
-    #         img = y.find('.//image[@size="large"]').text
-    #         aux.append(img)
-    #         result.append(aux)
-    #
-    # tparams = {
-    #     'title':'TOP Categorias',
-    #     'year':datetime.now().year,
-    #     'array' :result,
-    # }
-    # return render(request, 'top.html', tparams)
-
-
 def albumInfo(request, album, artist):
     assert isinstance(request, HttpRequest)
 
     albumObj = Album(str(album), str(artist))
-    print(albumObj)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            text = str(request.POST['comment'])
+            albumObj.storeComment('User', text)
+            albumObj = Album(str(album), str(artist))
 
     tparams = {
         'album' : album,
@@ -110,6 +82,10 @@ def albumInfo(request, album, artist):
         'tags': albumObj.getTags(),
         'tracks': albumObj.getTracks(),
         'title': album,
+        'form' : SearchForm(),
+        'commentForm': CommentForm(),
+        'comments': albumObj.getComments(),
+        'url' : 'album'
     }
     return render(request, 'album.html', tparams)
 
@@ -117,6 +93,14 @@ def artistInfo(request, artist):
     assert isinstance(request, HttpRequest)
 
     artistObj = Artist(artist)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            text = str(request.POST['comment'])
+            artistObj.storeComment('User', text)
+            artistObj = Artist(artist)
 
     tparams = {
         'summary': artistObj.getBiography(True),
@@ -131,6 +115,10 @@ def artistInfo(request, artist):
         'tags' : artistObj.getTags(),
         'news': getArtistNews(5, str(artistObj.getName())),
         'lengthNews': len(getArtistNews(5, str(artistObj.getName()))),
+        'form': SearchForm(),
+        'commentForm': CommentForm(),
+        'comments': artistObj.getComments(),
+        'url' : 'artist'
     }
 
     return render(request, 'artist.html', tparams)
@@ -138,26 +126,30 @@ def artistInfo(request, artist):
 def news(request):
     assert isinstance(request, HttpRequest)
 
-    news = getAllNews()
-
     tparams = {
-        'news' : news,
-
+        'news' : getAllNews(),
+        'form' : SearchForm()
     }
     return render(request, 'news.html', tparams)
 
 def searchResult(request):
     assert isinstance(request, HttpRequest)
 
-    searching = "carreira"
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
 
-    artistSearch = searchArtist(searching)
-    albumSearch = searchAlbum(searching)
+        if form.is_valid():
+            searching = str(request.POST['searchCriteria'])
+            artistSearch = searchArtist(searching)
+            albumSearch = searchAlbum(searching)
 
-    tparams = {
-        'artistSearch'   : artistSearch,
-        'lenArtistSearch': len(artistSearch),
-        'albumSearch'    : albumSearch,
-        'lenAlbumSearch' : len(albumSearch),
-    }
-    return render(request, 'searchResult.html', tparams)
+        tparams = {
+            'artistSearch'   : artistSearch,
+            'lenArtistSearch': len(artistSearch),
+            'albumSearch'    : albumSearch,
+            'lenAlbumSearch' : len(albumSearch),
+            'form' : SearchForm()
+        }
+        return render(request, 'searchResult.html', tparams)
+    else:
+        return render(request, 'searchResult.html', {'form' : SearchForm()})

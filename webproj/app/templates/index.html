@@ -43,26 +43,34 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <a href="/news" style="color:black" ><h2>Latest News</h2></a>
+                <h2>
+                    <span class="glyphicon glyphicon-bullhorn"></span>
+                    <a href="/news" style="color:black" >
+                        Latest News
+                    </a>
+                </h2>
                 {% for x in news %}
-                <div class="container">
-                    <br>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <a href="{{ x.link }}"><img class="img-rounded" height="110" width="110" src="{{ x.image }}" alt=""></a>
+                    <div class="container">
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <a href="{{ x.link }}">
+                                    <img class="img-rounded" height="110" width="110" src="{{ x.image }}" alt="">
+                                </a>
+                            </div>
+                            <div class="col-sm-8">
+                                <a href="{{ x.link }}" style="color:black">
+                                    <h3 class="media-heading">{{ x.title }}</h3>
+                                </a>
+                                {{ x.description }}
+                            </div>
                         </div>
-                        <div class="col-sm-8">
-                            <h3 class="media-heading"><a href="{{ x.link }}" style="color:black">{{ x.title }}</a></h3>
-                            {{ x.description }}
-                        </div>
+                        <br>
                     </div>
-                    <br>
-                </div>
-                {%endfor%}
+                {% endfor %}
             </div>
         <br>
             <div class="col-md-4 panel panel-default">
-{#                <ul class="nav nav-pills nav-justified">#}
                 <div class="nav panel-tabs">
                     <ul class="panel-heading nav nav-pills nav-justified">
                         <li role="presentation" class="active" ><a href="#artists" data-toggle="tab">Top Artists</a></li>

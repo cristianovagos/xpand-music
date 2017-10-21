@@ -20,6 +20,7 @@ class Artist:
         self.topTracks = []
         self.topAlbums = []
         self.tags = []
+        self.comments = []
 
         self.max_items = max_items
 
@@ -143,6 +144,21 @@ class Artist:
                             if tagInfo:
                                 self.tags.append(tagInfo.text)
 
+                    if tag.findall('comments/comment'):
+                        for comment in tag.findall('comments/comment'):
+                            if comment:
+                                commentInfo = []
+
+                                if comment.findall('user'):
+                                    commentInfo.append(comment.find('user').text)
+                                else:
+                                    continue
+
+                                if comment.findall('text'):
+                                    commentInfo.append(html.unescape(comment.find('text').text))
+
+                                self.comments.append(commentInfo)
+
 
     def checkDatabase(self):
         result = False
@@ -220,6 +236,7 @@ class Artist:
                 query += "<tag>" + tag + "</tag>"
 
             query += "</tags>" + \
+                     "<comments></comments> " + \
                      "</artist> " + \
                      "return insert node $node into $artists"
 
@@ -365,8 +382,98 @@ class Artist:
                         trackInfo.append(trackImage)
                         self.topTracks.append(trackInfo)
 
+
+    def storeComment(self, user, text):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            numComments = 0
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
+                    "return count($artist/comments/comment) "
+
+            queryObj = session.query(query)
+
+            # loop through all results
+            for typecode, item in queryObj.iter():
+                numComments = int(item)
+
+            queryObj.close()
+
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
+                    "let $insertpath := $artist/comments " + \
+                    "let $node := <comment>" + \
+                    "<id>" + str((numComments+1)) + "</id>" + \
+                    "<user>" + user + "</user>" + \
+                    "<text>" + html.escape(text) + "</text>" + \
+                    "</comment> " + \
+                    "return insert node $node into $insertpath"
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("comment")
+            print(e)
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+    def changeComment(self, numComment, newText):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
+                    "let $comment := $artist/comments/comment[id='" + numComment + "'] " + \
+                    "return replace value of node $comment/text with '" + html.escape(newText) + "' "
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("changeComment")
+            print(e)
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+
+    def deleteComment(self, numComment):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
+                    "let $comment := $artist/comments/comment[id='" + numComment + "'] " + \
+                    "return delete node $comment "
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("deleteComment")
+            print(e)
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+
     def exists(self):
         return self.artistExists
+
+    def getComments(self):
+        return self.comments
 
     def getTags(self):
         return self.tags

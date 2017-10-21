@@ -1,89 +1,91 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<section>
-    <div class="container" style="padding-top: 40px;">
-        <div class="row">
-            <ol class="breadcrumb">
-                <li>Artist</li>
-                <li class="active"><a href="/artist/{{ name }}">{{ name }}</a></li>
-            </ol>
+    <section>
+        <div class="container" style="padding-top: 40px;">
+            <div class="row">
+                <ol class="breadcrumb">
+                    <li>Artist</li>
+                    <li class="active"><a href="/artist/{{ name }}">{{ name }}</a></li>
+                </ol>
+            </div>
+            <br>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <img class="img-circle" src="{{ image }}">
+                </div>
+                <div class="col-md-7">
+                    <h1>{{ name }}</h1>
+                    <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                    {% for tag in tags %}
+                        <a href="#"><span class="label label-info">{{ tag }}</span></a>
+                    {% endfor %}
+                    <br><br>
+                    <p>{{ summary }}</p>
+                </div>
+                <br>
+            </div>
         </div>
         <br>
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <img class="img-circle" src="{{ image }}">
-            </div>
-            <div class="col-md-7">
-                <h1>{{ name }}</h1>
-                <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                {% for tag in tags %}
-                    <a href="#"><span class="label label-info">{{ tag }}</span></a>
-                {% endfor %}
-                <br><br>
-                <p>{{ summary }}</p>
-            </div>
-            <br>
-        </div>
-    </div>
-    <br>
-    <br>
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-sm-4"><h4 align="center">Top Albums</h4>
-                    <ul>
-                    {% for x in top5 %}
-                        <br>
-                        <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> <a href="/album/{{ name }}/{{ x.0 }}"> {{ x.0 }}</a>
-                        <br>
-                    {% endfor %}
-                    </ul>
-                </div>
-                <div class="col-sm-4" align="left"><h4 align="center">Top Songs</h4>
-                    <ul>
-                    {% for x in songs5 %}
-                        <br>
-                        <img class="img-rounded" src="{{ x.1 }}" height="84" width="84">
-                        {{ x.0 }}
-                        <br>
-                    {% endfor %}
-                    </ul>
-                </div>
-                <div class="col-sm-3" align="left"><h4 align="center">Related</h4>
-                   {% for x in similars %}
-                        <br>
-                        <img class="img-circle" src="{{ x.1 }}" height="84" width="84">
-                        <a href="/artist/{{ x.0 }}"> {{ x.0 }}</a>
-                        <br>
-                   {% endfor %}
+        <br>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-4"><h4 align="center">Top Albums</h4>
+                        <ul>
+                        {% for x in top5 %}
+                            <br>
+                            <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> <a href="/album/{{ name }}/{{ x.0 }}"> {{ x.0 }}</a>
+                            <br>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-sm-4" align="left"><h4 align="center">Top Songs</h4>
+                        <ul>
+                        {% for x in songs5 %}
+                            <br>
+                            <img class="img-rounded" src="{{ x.1 }}" height="84" width="84">
+                            {{ x.0 }}
+                            <br>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-sm-3" align="left"><h4 align="center">Related</h4>
+                       {% for x in similars %}
+                            <br>
+                            <img class="img-circle" src="{{ x.1 }}" height="84" width="84">
+                            <a href="/artist/{{ x.0 }}"> {{ x.0 }}</a>
+                            <br>
+                       {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <br><br>
-    {% if lengthNews != 0 %}
-    <div style="width:800px; margin:0 auto;">
-        <div class="container">
-        <h2>Latest News from {{ name }}</h2>
-            <!--   INSERT FOR HERE   NEWS-->
-            {% for x in news %}
-            <br>
-            <div class="row">
-                <div class="col-sm-2">
-                    <img class="img-rounded" height="95" width="95" src="{{ x.image }}" alt="">
-                </div>
-                <div class="col-sm">
-                    <a href="{{ x.link }}" style="color:black"><h4 class="media-heading">{{ x.title }}</h4></a>
-                    {{ x.description }}
-                    <h6>Source: {{ x.author }} ({{ x.pubDate }})</h6>
+        <br><br>
+        {% if lengthNews != 0 %}
+        <div style="width:800px; margin:0 auto;">
+            <div class="container">
+            <h2>Latest News from {{ name }}</h2>
+                <!--   INSERT FOR HERE   NEWS-->
+                {% for x in news %}
+                <br>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <img class="img-rounded" height="95" width="95" src="{{ x.image }}" alt="">
+                    </div>
+                    <div class="col-sm">
+                        <a href="{{ x.link }}" style="color:black"><h4 class="media-heading">{{ x.title }}</h4></a>
+                        {{ x.description }}
+                        <h6>Source: {{ x.author }} ({{ x.pubDate }})</h6>
 
+                    </div>
                 </div>
+                <br>
+                {% endfor %}
             </div>
-            <br>
-            {% endfor %}
         </div>
-    </div>
-    {% endif %}
-</section>
+        {% endif %}
+    </section>
+
+    {% include 'comment.html' %}
 {% endblock %}

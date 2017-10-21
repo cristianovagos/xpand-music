@@ -1,55 +1,55 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
-<section>
-    <div class="container" style="padding-top: 40px">
-        <div class="row">
-            <ol class="breadcrumb">
-                <li><a href="/artist/{{ artist }}">{{ artist }}</a></li>
-                <li>Albums</li>
-                <li class="active">{{ album }}</li>
-            </ol>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-              <img class="img-rounded" src="{{ image }}" alt="">
+    <section>
+        <div class="container" style="padding-top: 40px">
+            <div class="row">
+                <ol class="breadcrumb">
+                    <li><a href="/artist/{{ artist }}">{{ artist }}</a></li>
+                    <li>Albums</li>
+                    <li class="active">{{ album }}</li>
+                </ol>
             </div>
-            <div class="col-md-7">
-                <h1 class="my-4">{{ album }}<br>
-                    <small>by <a href="/artist/{{ artist }}"> {{ artist }}</a></small>
-                </h1>
-                <br>
-                <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                {% for tag in tags %}
-                    <a href="#"><span class="label label-info">{{ tag }}</span></a>
-                {% endfor %}
-                <br><br>
-                <p>{{ wiki }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="container" style="padding-top: 30px">
-        <hr>
-        <div class="row">
-            <h3 class="my-3">
-                Tracks in {{ album }}:
-            </h3>
-            <div class="col-md-6">
-                <ul class="list-group">
-                    {% for track in tracks %}
-                         <a href="#" class="list-group-item">
-                             <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;
-                             {{ track }}
-                         </a>
+            <div class="row">
+                <div class="col-md-4">
+                  <img class="img-rounded" src="{{ image }}" alt="">
+                </div>
+                <div class="col-md-7">
+                    <h1 class="my-4">{{ album }}<br>
+                        <small>by <a href="/artist/{{ artist }}"> {{ artist }}</a></small>
+                    </h1>
+                    <br>
+                    <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                    {% for tag in tags %}
+                        <a href="#"><span class="label label-info">{{ tag }}</span></a>
                     {% endfor %}
-                </ul>
-            </div>
-            <div class="col-md-5">
-                <!-- inserir aqui alguma coisa para encher tipo outros albuns do artista -->
+                    <br><br>
+                    <p>{{ wiki }}</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+        <div class="container" style="padding-top: 30px">
+            <hr>
+            <div class="row">
+                <h3 class="my-3">
+                    Tracks in {{ album }}:
+                </h3>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        {% for track in tracks %}
+                             <a href="#" class="list-group-item">
+                                 <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;
+                                 {{ track }}
+                             </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-5">
+                    <!-- inserir aqui alguma coisa para encher tipo outros albuns do artista -->
+                </div>
+            </div>
+        </div>
+    </section>
 
+    {% include 'comment.html' %}
 {% endblock %}

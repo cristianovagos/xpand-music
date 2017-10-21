@@ -1,0 +1,70 @@
+{% block comment %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                {% if comments|length == 1 %}
+                    <h3>{{ comments|length }} Comment</h3>
+                {% elif comments|length > 1 %}
+                    <h3>{{ comments|length }} Comments</h3>
+                {% else %}
+                    <h3>Be the first to comment!</h3>
+                {% endif %}
+                <br>
+            </div>
+        </div>
+
+        {% for comment in comments %}
+            <div class="row">
+                <div class="col-sm-1">
+                    <div class="thumbnail">
+                        <img class="img-responsive user-photo" src="https://ssl.gstatic.com/accounts/ui/avatar_2x.png">
+                    </div>
+                </div>
+                <div class="col-sm-5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>{{ comment.0 }}</strong> <span class="text-muted">commmented</span>
+                        </div>
+                        <div class="panel-body" style="padding-left: 15px;">
+                            {{ comment.1 }}
+                            <br>
+                            <br>
+                        </div>
+                        <div class="panel-footer text-right">
+                            <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-edit"></span> Change
+                            </button>
+                            <button type="button" class="btn btn-danger btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-remove"></span> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h4>Leave a comment...</h4>
+            </div>
+            <div class="col-sm-9">
+                {% if url == 'artist' %}
+                    <form action='/artist/{{ name }}' method="post" >
+                {% else %}
+                    <form action='/album/{{ artist }}/{{ album }}' method="post" >
+                {% endif %}
+                        {% csrf_token %}
+                        <div class="input-group-lg">
+                            {{ commentForm.comment }}
+                        </div>
+                        <br>
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="submit">Comment</button>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

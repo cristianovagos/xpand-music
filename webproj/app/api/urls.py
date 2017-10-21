@@ -34,7 +34,7 @@ def getAlbumTopTagsIDURL(mbid):
 def getAlbumTopTagsURL(artist, album):
     return getBaseURL() + "album.gettoptags" + getAPIKeyText() + "&artist=" + artist + "&album=" + album
 
-def getAlbumSearchURL(album, limit=None, page=None):
+def getAlbumSearchURL(album, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -69,7 +69,7 @@ def getArtistSimilarIDURL(mbid):
 def getArtistSimilarURL(artist):
     return getBaseURL() + "artist.getsimilar" + getAPIKeyText() + "&artist=" + artist
 
-def getArtistTopTracksIDURL(mbid, limit=None, page=None):
+def getArtistTopTracksIDURL(mbid, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -84,7 +84,7 @@ def getArtistTopTracksIDURL(mbid, limit=None, page=None):
         return getBaseURL() + "artist.gettoptracks" + getAPIKeyText() + "&mbid=" + mbid + "&page=" + str(page)
     return getBaseURL() + "artist.gettoptracks" + getAPIKeyText() + "&mbid=" + mbid
 
-def getArtistTopTracksURL(artist, limit=None, page=None):
+def getArtistTopTracksURL(artist, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -99,7 +99,7 @@ def getArtistTopTracksURL(artist, limit=None, page=None):
         return getBaseURL() + "artist.gettoptracks" + getAPIKeyText() + "&artist=" + artist + "&page=" + str(page)
     return getBaseURL() + "artist.gettoptracks" + getAPIKeyText() + "&artist=" + artist
 
-def getArtistTopAlbumsIDURL(mbid, limit=None, page=None):
+def getArtistTopAlbumsIDURL(mbid, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -114,7 +114,7 @@ def getArtistTopAlbumsIDURL(mbid, limit=None, page=None):
         return getBaseURL() + "artist.gettopalbums" + getAPIKeyText() + "&mbid=" + mbid + "&page=" + str(page)
     return getBaseURL() + "artist.gettopalbums" + getAPIKeyText() + "&mbid=" + mbid
 
-def getArtistTopAlbumsURL(artist, limit=None, page=None):
+def getArtistTopAlbumsURL(artist, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -135,7 +135,7 @@ def getArtistTopTagsIDURL(mbid):
 def getArtistTopTagsURL(artist):
     return getBaseURL() + "artist.gettoptags" + getAPIKeyText() + "&artist=" + artist
 
-def getArtistSearchIDURL(mbid, limit=None, page=None):
+def getArtistSearchIDURL(mbid, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -150,7 +150,7 @@ def getArtistSearchIDURL(mbid, limit=None, page=None):
         return getBaseURL() + "artist.search" + getAPIKeyText() + "&mbid=" + mbid + "&page=" + str(page)
     return getBaseURL() + "artist.search" + getAPIKeyText() + "&mbid=" + mbid
 
-def getArtistSearchURL(artist, limit=None, page=None):
+def getArtistSearchURL(artist, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -223,7 +223,7 @@ def getTopTracksURL(limit=5, page=1):
 # limit: number of results to fetch per page
 # page: page number to fetch
 
-def getGeoTopArtistsURL(country, limit=None, page=None):
+def getGeoTopArtistsURL(country, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -239,7 +239,7 @@ def getGeoTopArtistsURL(country, limit=None, page=None):
     return getBaseURL() + "geo.gettopartists" + getAPIKeyText() + "&country=" + country
 
 
-def getGeoTopTracksURL(country, limit=None, page=None):
+def getGeoTopTracksURL(country, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -267,7 +267,7 @@ def getTagInfoURL(tag):
 def getTagSimilarURL(tag):
     return getBaseURL() + "tag.getsimilar" + getAPIKeyText() + "&tag=" + tag
 
-def getTagTopAlbumsURL(tag, limit=None, page=None):
+def getTagTopAlbumsURL(tag, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -282,7 +282,7 @@ def getTagTopAlbumsURL(tag, limit=None, page=None):
         return getBaseURL() + "tag.gettopalbums" + getAPIKeyText() + "&tag=" + tag + "&page=" + str(page)
     return getBaseURL() + "tag.gettopalbums" + getAPIKeyText() + "&tag=" + tag
 
-def getTagTopArtistsURL(tag, limit=None, page=None):
+def getTagTopArtistsURL(tag, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -297,7 +297,7 @@ def getTagTopArtistsURL(tag, limit=None, page=None):
         return getBaseURL() + "tag.gettopartists" + getAPIKeyText() + "&tag=" + tag + "&page=" + str(page)
     return getBaseURL() + "tag.gettopartists" + getAPIKeyText() + "&tag=" + tag
 
-def getTagTopTagsURL(tag, limit=None, page=None):
+def getTagTopTagsURL(tag, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -312,7 +312,7 @@ def getTagTopTagsURL(tag, limit=None, page=None):
         return getBaseURL() + "tag.gettoptags" + getAPIKeyText() + "&tag=" + tag + "&page=" + str(page)
     return getBaseURL() + "tag.gettoptags" + getAPIKeyText() + "&tag=" + tag
 
-def getTagTopTracksURL(tag, limit=None, page=None):
+def getTagTopTracksURL(tag, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')
@@ -345,14 +345,14 @@ def getTrackInfoIDURL(mbid):
 def getTrackInfoURL(track, artist):
     return getBaseURL() + "track.getinfo" + getAPIKeyText() + "&artist=" + artist + "&track=" + track
 
-def getTrackSimilarIDURL(mbid, limit=None):
+def getTrackSimilarIDURL(mbid, limit=5):
     if limit:
         if not isinstance(limit, int):
             raise TypeError('Limit should be int type!')
         return getBaseURL() + "track.getsimilar" + getAPIKeyText() + "&mbid=" + mbid + "&limit=" + str(limit)
     return getBaseURL() + "track.getsimilar" + getAPIKeyText() + "&mbid=" + mbid
 
-def getTrackSimilarURL(track, artist, limit=None):
+def getTrackSimilarURL(track, artist, limit=5):
     if limit:
         if not isinstance(limit, int):
             raise TypeError('Limit should be int type!')
@@ -371,7 +371,7 @@ def getTrackTopTagsIDURL(mbid):
 def getTrackTopTagsURL(track, artist):
     return getBaseURL() + "track.gettoptags" + getAPIKeyText() + "&artist=" + artist + "&track=" + track
 
-def getTrackSearchURL(track, artist=None, limit=None, page=None):
+def getTrackSearchURL(track, artist=None, limit=5, page=1):
     if limit and page:
         if not isinstance(limit, int) or not isinstance(page, int):
             raise TypeError('Limit or Page should be int type!')

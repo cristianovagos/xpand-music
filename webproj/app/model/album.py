@@ -17,6 +17,7 @@ class Album:
         self.image = None
         self.tracks = []
         self.tags = []
+        self.comments = []
         self.wikiTextShort = None
         self.wikiTextFull = None
 
@@ -74,11 +75,28 @@ class Album:
                     self.wikiTextShort = html.unescape(tag.find('wikiShort').text)
                     self.wikiTextFull = html.unescape(tag.find('wikiFull').text)
 
-                    for track in tag.findall('tracks/track'):
-                        self.tracks.append(html.unescape(track.find('name').text))
+                    if tag.findall('tracks/track'):
+                        for track in tag.findall('tracks/track'):
+                            self.tracks.append(html.unescape(track.find('name').text))
 
-                    for tagInfo in tag.findall('tags/tag'):
-                        self.tags.append(tagInfo.text)
+                    if tag.findall('tags/tag'):
+                        for tagInfo in tag.findall('tags/tag'):
+                            self.tags.append(tagInfo.text)
+
+                    if tag.findall('comments/comment'):
+                        for comment in tag.findall('comments/comment'):
+                            if comment:
+                                commentInfo = []
+
+                                if comment.findall('user'):
+                                    commentInfo.append(comment.find('user').text)
+                                else:
+                                    continue
+
+                                if comment.findall('text'):
+                                    commentInfo.append(html.unescape(comment.find('text').text))
+
+                                self.comments.append(commentInfo)
 
     def putInDatabase(self):
         session = Session('localhost', 1984, 'admin', 'admin')
@@ -122,6 +140,7 @@ class Album:
                 query += "<tag>" + tag + "</tag>"
 
             query += "</tags> " + \
+                     "<comments></comments> " + \
                      "</album> " + \
                      "return insert node $node into $insertpath"
 
@@ -239,8 +258,96 @@ class Album:
                                 if tag.find('name').text:
                                     tagText = tag.find('name').text
                                     self.tags.append(tagText)
+
+
+    def changeComment(self, numComment, newText):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.artist + "' " + \
+                    "let $comment := $artist//album[name='" + self.name + "']/comments/comment[id='" + numComment + "'] " + \
+                    "return replace value of node $comment/text with '" + html.escape(newText) + "' "
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("changeComment")
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+
+    def deleteComment(self, numComment):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.artist + "' " + \
+                    "let $comment := $artist//album[name='" + self.name + "']/comments/comment[id='" + numComment + "'] " + \
+                    "return delete node $comment "
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("deleteComment")
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
+
+    def storeComment(self, user, text):
+        session = Session('localhost', 1984, 'admin', 'admin')
+
+        try:
+            numComments = 0
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.artist + "' " + \
+                    "return count($artist//album[name='" + self.name + "']/comments/comment) "
+
+            queryObj = session.query(query)
+
+            # loop through all results
+            for typecode, item in queryObj.iter():
+                numComments = int(item)
+
+            queryObj.close()
+
+            query = "let $artists := collection('xpand-db')//artist " + \
+                    "for $artist in $artists where $artist/name = '" + self.artist + "' " + \
+                    "let $insertpath := $artist//album[name='" + self.name + "']/comments " + \
+                    "let $node := <comment>" + \
+                    "<id>" + str((numComments+1)) + "</id>" + \
+                    "<user>" + user + "</user>" + \
+                    "<text>" + html.escape(text) + "</text>" + \
+                    "</comment> " + \
+                    "return insert node $node into $insertpath"
+
+            queryObj = session.query(query)
+            queryObj.execute()
+            queryObj.close()
+
+        except Exception as e:
+            print("comment")
+            print("Something failed on XML Database!")
+
+        finally:
+            if session:
+                session.close()
+
     def exists(self):
         return self.albumExists
+
+    def getComments(self):
+        return self.comments
 
     def getName(self):
         return self.name
