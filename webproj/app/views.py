@@ -165,5 +165,6 @@ def top(request):
     tparams = {
         'topArtists' : artists,
         'tags'       : tags,
+        'form': SearchForm()
     }
     return render(request, 'top.html', tparams)
