@@ -9,8 +9,8 @@ So, xPand (as we agreed to call this project) uses Last.fm XML API to fetch data
 This project may be incomplete and it surely needs more attention and features, but that's what we could do for the deadline provided of the course.
 
 ### Developers and collaborators:
-- Cristiano Vagos (http://github.com/cristianovagos)
-- André Rodrigues (http://github.com/suduaya)
+- [Cristiano Vagos](http://github.com/cristianovagos)
+- [André Rodrigues](http://github.com/suduaya)
 
 ### Installation
 Install Python 3.6, BaseX and Django:
