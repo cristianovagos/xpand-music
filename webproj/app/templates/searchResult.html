@@ -4,45 +4,72 @@
     <div class="container">
     <br>
         <div class="row">
-            <div class="col-md-8">
-                <h1>Search Result</h1>
+            {% if search and artistSearch|length == 0 and albumSearch|length == 0 %}
                 <div class="container">
-                    {% if lenArtistSearch != 0 %}
-                    <h2>Artists & Tracks</h2>
-                    <!--   INSERT FOR HERE   artistas-->
-                    {% for x in artistSearch %}
-                    <br>
                     <div class="row">
-                        <div class="col-sm-2">
-                            <a href="/artist/{{ x.name }}" style="color:black"><img class="img-circle" height="100" width="100" src="{{ x.image }}" alt=""></a>
-                        </div>
-                        <div class="col-sm">
-                            <br>
-                            <a href="/artist/{{ x.name }}" style="color:black"><h4>{{ x.name }}</h4></a>
-                        </div>
+                        <h1 class="text-center" style="padding-top: 100px;">Sorry, your search got no results.</h1>
+                        <h3 class="text-center" style="padding-bottom: 300px;">Please, try again with other search criteria.</h3>
                     </div>
-                    {% endfor %}
-                    <br>
-                    {% endif %}
-                    {% if lenAlbumSearch != 0 %}
-                    <h2>Albums</h2>
-                    <!--   INSERT FOR HERE   artistas-->
-                    {% for y in albumSearch %}
-                    <br>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <a href="/album/{{ y.artist }}/{{ y.name }}" style="color:black"><img class="img-rounded" height="100" width="100" src="{{ y.image }}" alt=""></a>
-                        </div>
-                        <div class="col-sm">
-                            <br>
-                            <a href="/album/{{ y.artist }}/{{ y.name }}" style="color:black"><h4>{{ y.name }}</h4></a> by <a href="/artist/{{ y.artist }}" style="color:black">{{ y.artist }}</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    <br>
-                    {% endif %}
                 </div>
-            </div>
+            {% elif search %}
+                <div class="col-md-8">
+                    <h1>Search results for "{{ search }}":</h1>
+                    <div class="container">
+                        {% if artistSearch|length != 0 %}
+                            <h2>Artists & Tracks</h2>
+                            {% for artist in artistSearch %}
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <a href="{% url 'artist' artist=artist.name %}" style="color:black">
+                                            <img class="img-circle" height="100" width="100" src="{{ artist.image }}">
+                                        </a>
+                                    </div>
+                                    <div class="col-sm">
+                                        <br>
+                                        <a href="{% url 'artist' artist=artist.name %}" style="color:black">
+                                            <h4>{{ artist.name }}</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <br>
+                        {% endif %}
+
+                        {% if albumSearch|length != 0 %}
+                            <h2>Albums</h2>
+                            {% for album in albumSearch %}
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
+                                            <img class="img-rounded" height="100" width="100" src="{{ album.image }}">
+                                        </a>
+                                    </div>
+                                    <div class="col-sm">
+                                        <br>
+                                        <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
+                                            <h4>{{ album.name }}</h4>
+                                        </a>
+                                        by
+                                        <a href="{% url 'artist' artist=album.artist %}" style="color:black">
+                                            {{ album.artist }}
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <br>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="container">
+                    <div class="row">
+                        <h1 class="text-center" style="padding-top: 100px;">Sorry, your search seems to be invalid!</h1>
+                        <h3 class="text-center" style="padding-bottom: 300px;">Try again, please.</h3>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 

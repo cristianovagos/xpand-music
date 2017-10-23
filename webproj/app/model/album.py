@@ -96,6 +96,9 @@ class Album:
                                 if comment.findall('text'):
                                     commentInfo.append(html.unescape(comment.find('text').text))
 
+                                if comment.findall('id'):
+                                    commentInfo.append(comment.find('id').text)
+
                                 self.comments.append(commentInfo)
 
     def putInDatabase(self):

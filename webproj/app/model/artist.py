@@ -9,7 +9,7 @@ from ..db.BaseXClient import Session
 
 class Artist:
 
-    def __init__(self, name, max_items=5):
+    def __init__(self, name, max_items=5, store=True):
         self.name = name
         self.mbid = None
         self.image = "http://paradeal.pp.ua/img/no-user.jpg"
@@ -36,7 +36,8 @@ class Artist:
         else:
             print('Fetching from API')
             self.fetchInfo()
-            self.putInDatabase()
+            if store:
+                self.putInDatabase()
 
     def fetchInfoDatabase(self):
         result = False
@@ -44,8 +45,8 @@ class Artist:
 
         try:
             query = "let $artists := collection('xpand-db')//artist " + \
-                    "for $artist in $artists where $artist/name = '" + self.name + "' " + \
-                    "return <result>{$artist}</result>"
+                    "let $value := $artists[name= '" + self.name + "'] " + \
+                    "return <result>{$value}</result>"
 
             queryObj = session.query(query)
 
@@ -155,6 +156,9 @@ class Artist:
 
                                 if comment.findall('text'):
                                     commentInfo.append(html.unescape(comment.find('text').text))
+
+                                if comment.findall('id'):
+                                    commentInfo.append(comment.find('id').text)
 
                                 self.comments.append(commentInfo)
 

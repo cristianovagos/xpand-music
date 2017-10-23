@@ -3,7 +3,7 @@ from urllib.request import urlopen
 from ..urls import getTagTopArtistsURL, getTopTagsURL
 from ...model.artist import Artist
 
-def getTagTopArtists(tag, num=5):
+def getTagTopArtists(tag, num=4):
     file = urlopen(getTagTopArtistsURL(tag))
     tree = ET.parse(file)
     root = tree.getroot()
@@ -16,19 +16,15 @@ def getTagTopArtists(tag, num=5):
         aux['name'] = str(x.find('name').text)
         aux['image'] = str(x.find('image[@size="extralarge"]').text)
         aux['tag'] =  str(tag)
-        artistObj = Artist(aux['name'])
-        topAlbums = artistObj.getTopAlbums()
-        aux['topAlbums'] = topAlbums[:3]
-
         result.append(aux)
         i+=1
-
-
+    print(tag + ':')
+    print(result)
     return result
 
 
-def topGenresArtists():
-    file = urlopen(getTopTagsURL())
+def topTags():
+    file = urlopen(getTopTagsURL(limit=10))
     tree = ET.parse(file)
     root = tree.getroot()
     result = []

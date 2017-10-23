@@ -5,7 +5,7 @@
         <div class="container" style="padding-top: 40px">
             <div class="row">
                 <ol class="breadcrumb">
-                    <li><a href="/artist/{{ artist }}">{{ artist }}</a></li>
+                    <li><a href="{% url 'artist' artist=artist %}">{{ artist }}</a></li>
                     <li>Albums</li>
                     <li class="active">{{ album }}</li>
                 </ol>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="col-md-7">
                     <h1 class="my-4">{{ album }}<br>
-                        <small>by <a href="/artist/{{ artist }}"> {{ artist }}</a></small>
+                        <small>by <a href="{% url 'artist' artist=artist %}"> {{ artist }}</a></small>
                     </h1>
                     <br>
                     <span class="glyphicon glyphicon-tags"></span>&nbsp;

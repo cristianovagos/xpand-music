@@ -23,9 +23,9 @@ urlpatterns = [
     url(r'^contact$', views.contact, name='contact'),
     url(r'^about', views.about, name='about'),
     url(r'^login/$', auth.login, name='login'),
-    url(r'^top/', views.top, name='top'),
-    url(r'^album/(?P<artist>[\w|\W]+)/(?P<album>[\w|\W]+)/$', views.albumInfo, name='albumInfo'),
-    url(r'^artist/(?P<artist>[\w|\W]+)$', views.artistInfo, name='artistInfo'),
+    url(r'^topartists/', views.topArtistsByTag, name='topArtists'),
+    url(r'^album/(?P<artist>[\w|\W]+)/(?P<album>[\w|\W]+)/$', views.album, name='album'),
+    url(r'^artist/(?P<artist>[\w|\W]+)$', views.artist, name='artist'),
     url(r'^news/', views.news, name='news'),
-    url(r'^search/', views.searchResult, name='searchResult'),
+    url(r'^search/', views.search, name='search'),
 ]

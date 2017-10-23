@@ -7,7 +7,7 @@
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'content/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'content/site.css' %}" />
-    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+    <link href="{% static 'fonts/righteous.css' %}" rel="stylesheet">
     <script src="{% static 'scripts/modernizr-2.6.2.js' %}"></script>
 </head>
 
@@ -28,13 +28,12 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'news' %}">Latest News</a></li>
-                    <li><a href="{% url 'top' %}">Top Artists</a></li>
+                    <li><a href="{% url 'news' %}">News</a></li>
+                    <li><a href="{% url 'topArtists' %}">Top Artists</a></li>
                 </ul>
-                {% include 'loginpartial.html' %}
 
                 <div class="col-sm-3 col-md-3 navbar-right">
-                    <form action='/search/' method="post" class="navbar-form" role="search">
+                    <form action='{% url 'search' %}' method="post" class="navbar-form" role="search">
                         {% csrf_token %}
                         <div class="input-group">
                             {{ form.searchCriteria }}

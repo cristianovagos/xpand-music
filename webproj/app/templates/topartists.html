@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="width:800px; margin:0 auto;">
+    <div class="container">
+    <br>
+        <div class="row">
+            <h1 align="center">Top Artists</h1>
+            <div class="container">
+                <!--   INSERT FOR HERE   NEWS-->
+                {% for tag in tags %}
+                    <br>
+                    <h2>{{ tag }}</h2>
+                    <br>
+                    {% for artist in topArtists %}
+                        <div class="row">
+                        {% for key in artist %}
+                            {% if key.tag == tag %}
+                                <div class="col-sm-3 text-center">
+                                    <a href="/artist/{{ key.name }}">
+                                        <img class="img-circle" height="105" width="105" src="{{ key.image }}">
+                                    </a>
+                                    <br><br>
+                                    <a href="/artist/{{ key.name }}">
+                                        <h4 class="media-heading text-center" style="color:black">
+                                            {{ key.name }}
+                                        </h4>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-sm-12">
                 {% if comments|length == 1 %}
-                    <h3>{{ comments|length }} Comment</h3>
+                    <h3>1 Comment</h3>
                 {% elif comments|length > 1 %}
                     <h3>{{ comments|length }} Comments</h3>
                 {% else %}
@@ -32,12 +32,50 @@
                             <br>
                         </div>
                         <div class="panel-footer text-right">
-                            <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                            <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align" data-toggle="collapse" data-target="#edit{{ forloop.counter }}">
                                 <span class="glyphicon glyphicon-edit"></span> Change
                             </button>
-                            <button type="button" class="btn btn-danger btn-xs" aria-label="Left Align">
-                                <span class="glyphicon glyphicon-remove"></span> Remove
-                            </button>
+                            <br>
+                            {% if url == 'artist' %}
+                                <form action='/artist/{{ name }}' method="post" >
+                            {% else %}
+                                <form action='/album/{{ artist }}/{{ album }}' method="post" >
+                            {% endif %}
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form-type" value="delete-form" />
+                                    <input type="hidden" name="commentID" value="{{ comment.2 }}">
+                                    <button type="submit" class="btn btn-danger btn-xs" aria-label="Left Align" onclick="return confirm('Are you sure you want to delete this comment?')">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+                                </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-5">
+                    <div id="edit{{ forloop.counter }}" class="collapse panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Edit this comment</strong>
+                        </div>
+                        <div class="panel-body" style="padding-left: 15px;">
+                            {% if url == 'artist' %}
+                                <form action='/artist/{{ name }}' method="post" >
+                            {% else %}
+                                <form action='/album/{{ artist }}/{{ album }}' method="post" >
+                            {% endif %}
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form-type" value="edit-form" />
+                                    <input type="hidden" name="commentID" value="{{ comment.2 }}">
+                                    <div class="input-group-lg">
+                                        <textarea name="editComment" placeholder="{{ comment.1 }}" rows="5" cols="50"></textarea>
+                                    </div>
+                                    <br>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" type="submit">Edit</button>
+                                    </div>
+                                </form>
                         </div>
                     </div>
                 </div>
@@ -55,6 +93,7 @@
                     <form action='/album/{{ artist }}/{{ album }}' method="post" >
                 {% endif %}
                         {% csrf_token %}
+                        <input type="hidden" name="form-type" value="comment-form" />
                         <div class="input-group-lg">
                             {{ commentForm.comment }}
                         </div>

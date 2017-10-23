@@ -60,18 +60,29 @@ def about(request):
         }
     )
 
-def albumInfo(request, album, artist):
+def album(request, album, artist):
     assert isinstance(request, HttpRequest)
 
     albumObj = Album(str(album), str(artist))
 
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        if request.POST['form-type'] == 'comment-form':
+            form = CommentForm(request.POST)
 
-        if form.is_valid():
-            text = str(request.POST['comment'])
-            albumObj.storeComment('User', text)
+            if form.is_valid():
+                text = str(request.POST['comment'])
+                albumObj.storeComment('User', text)
+                albumObj = Album(str(album), str(artist))
+        elif request.POST['form-type'] == 'edit-form':
+            edit = str(request.POST['editComment'])
+            commentID = str(request.POST['commentID'])
+            albumObj.changeComment(commentID, edit)
             albumObj = Album(str(album), str(artist))
+        else:
+            commentID = str(request.POST['commentID'])
+            albumObj.deleteComment(commentID)
+            albumObj = Album(str(album), str(artist))
+
 
     tparams = {
         'album' : album,
@@ -89,17 +100,28 @@ def albumInfo(request, album, artist):
     }
     return render(request, 'album.html', tparams)
 
-def artistInfo(request, artist):
+def artist(request, artist):
     assert isinstance(request, HttpRequest)
 
     artistObj = Artist(artist)
 
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        print(str(request.POST['form-type']))
+        if request.POST['form-type'] == 'comment-form':
+            form = CommentForm(request.POST)
 
-        if form.is_valid():
-            text = str(request.POST['comment'])
-            artistObj.storeComment('User', text)
+            if form.is_valid():
+                text = str(request.POST['comment'])
+                artistObj.storeComment('User', text)
+                artistObj = Artist(artist)
+        elif request.POST['form-type'] == 'edit-form':
+            edit = str(request.POST['editComment'])
+            commentID = str(request.POST['commentID'])
+            artistObj.changeComment(commentID, edit)
+            artistObj = Artist(artist)
+        else:
+            commentID = str(request.POST['commentID'])
+            artistObj.deleteComment(commentID)
             artistObj = Artist(artist)
 
     tparams = {
@@ -132,7 +154,7 @@ def news(request):
     }
     return render(request, 'news.html', tparams)
 
-def searchResult(request):
+def search(request):
     assert isinstance(request, HttpRequest)
 
     if request.method == 'POST':
@@ -143,27 +165,31 @@ def searchResult(request):
             artistSearch = searchArtist(searching)
             albumSearch = searchAlbum(searching)
 
-        tparams = {
-            'artistSearch'   : artistSearch,
-            'lenArtistSearch': len(artistSearch),
-            'albumSearch'    : albumSearch,
-            'lenAlbumSearch' : len(albumSearch),
-            'form' : SearchForm()
-        }
-        return render(request, 'searchResult.html', tparams)
-    else:
-        return render(request, 'searchResult.html', {'form' : SearchForm()})
+            tparams = {
+                'artistSearch'   : artistSearch,
+                'albumSearch'    : albumSearch,
+                'form'           : SearchForm(),
+                'search'         : searching
+            }
 
-def top(request):
+            return render(request, 'searchResult.html', tparams)
+    return render(request, 'searchResult.html',
+                  {
+                      'form'    : SearchForm(),
+                      'search'  : None
+                  })
+
+def topArtistsByTag(request):
     assert isinstance(request, HttpRequest)
 
     artists = []
-    tags =  topGenresArtists()
+    tags = topTags()
     for tag in tags:
         artists.append(getTagTopArtists(tag))
 
     tparams = {
         'topArtists' : artists,
         'tags'       : tags,
+        'form'       : SearchForm()
     }
-    return render(request, 'top.html', tparams)
+    return render(request, 'topartists.html', tparams)
