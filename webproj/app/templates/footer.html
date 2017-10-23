@@ -1,0 +1,48 @@
+{% load staticfiles %}
+<footer id="myFooter" style="background-color: #101010; color: white; margin-top: 50px;">
+    <div class="container">
+        <div class="row" style="margin-bottom: 60px;">
+            <div class="col-sm-3">
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Get started</h5>
+                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'news' %}">News</a></li>
+                    <li><a href="{% url 'topArtists' %}">Top Artists</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3">
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">About us</h5>
+                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
+                    <li><a href="#">Company Information</a></li>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">Reviews</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3">
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Support</h5>
+                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Help desk</a></li>
+                    <li><a href="#">Forums</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3 info" style="text-align: justify; color: #afb0b1;">
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">About
+                    <font style="font-family: Righteous, cursive">xPand</font>
+                </h5>
+                <p>Here is the only place where you can know more about your favorite artists, albums and tracks.
+                    See who's on top right now, and look for the latest news of the world of music.</p>
+            </div>
+        </div>
+    </div>
+    <div class="second-bar">
+       <div class="container">
+            <h2 class="logo" style="font-family: Righteous, cursive; margin-top: 10px; ">
+                <a href="#">
+                    <img src="{% static 'images/panda-icon.png' %}" width="40" height="40">&nbsp;xPand
+                </a>
+            </h2>
+            <p class="text-left" style="padding-top: 25px;">&nbsp;&nbsp;&nbsp;&nbsp;is a Django app developed by Cristiano Vagos and André Rodrigues.</p>
+        </div>
+    </div>
+</footer>

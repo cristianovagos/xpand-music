@@ -18,8 +18,6 @@ def getTagTopArtists(tag, num=4):
         aux['tag'] =  str(tag)
         result.append(aux)
         i+=1
-    print(tag + ':')
-    print(result)
     return result
 
 

@@ -12,7 +12,6 @@ from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
 from .forms import SearchForm, CommentForm
 from .api.tags.tags import *
-#from webproj.app.api.artists.artists import getArtistInfo
 
 
 # Create your views here.
@@ -22,43 +21,13 @@ def home(request):
     assert isinstance(request, HttpRequest)
 
     tparams = {
-        'title':'xPand',
-        'message':'Your indexx page.',
-        'year':datetime.now().year,
+        'title':'xPand - Your music hub.',
         'topArtists' : getTopArtists(),
         'topTracks': getTopTracks(),
-        'news': getAllNews(5),
+        'news': getAllNews(6),
         'form': SearchForm()
     }
     return render(request, 'index.html', tparams)
-
-def contact(request):
-    """Renders the contact page."""
-    assert isinstance(request, HttpRequest)
-    tparams = {
-        'title':'Contact',
-        'message':'Your contact page.',
-        'year':datetime.now().year,
-    }
-    return render(request, 'contact.html', tparams)
-
-
-def about(request):
-    assert isinstance(request, HttpRequest)
-    tparams = {
-        'title': 'About',
-        'message': 'Your application description page.',
-        'year': datetime.now().year,
-    }
-    return render(
-        request,
-        'about.html',
-        {
-            'title': 'About',
-            'message': 'Your application description page.',
-            'year': datetime.now().year,
-        }
-    )
 
 def album(request, album, artist):
     assert isinstance(request, HttpRequest)
@@ -85,6 +54,7 @@ def album(request, album, artist):
 
 
     tparams = {
+        'title' : 'xPand | "' + str(album) + '" by ' + str(artist),
         'album' : album,
         'artist': artist,
         'year': datetime.now().year,
@@ -92,7 +62,6 @@ def album(request, album, artist):
         'wiki': albumObj.getWikiShort(),
         'tags': albumObj.getTags(),
         'tracks': albumObj.getTracks(),
-        'title': album,
         'form' : SearchForm(),
         'commentForm': CommentForm(),
         'comments': albumObj.getComments(),
@@ -133,7 +102,7 @@ def artist(request, artist):
         'topAlbums': artistObj.getTopAlbums(),
         'top5': artistObj.getTopAlbums(),
         'songs5': artistObj.getTopTracks(),
-        'title': artistObj.getName(),
+        'title': 'xPand | ' + artistObj.getName(),
         'tags' : artistObj.getTags(),
         'news': getArtistNews(5, str(artistObj.getName())),
         'lengthNews': len(getArtistNews(5, str(artistObj.getName()))),
@@ -149,6 +118,7 @@ def news(request):
     assert isinstance(request, HttpRequest)
 
     tparams = {
+        'title': 'xPand | News',
         'news' : getAllNews(),
         'form' : SearchForm()
     }
@@ -166,6 +136,7 @@ def search(request):
             albumSearch = searchAlbum(searching)
 
             tparams = {
+                'title': 'xPand | Search by "' + searching + '"',
                 'artistSearch'   : artistSearch,
                 'albumSearch'    : albumSearch,
                 'form'           : SearchForm(),
@@ -175,6 +146,7 @@ def search(request):
             return render(request, 'searchResult.html', tparams)
     return render(request, 'searchResult.html',
                   {
+                      'title': 'xPand - Your music hub.',
                       'form'    : SearchForm(),
                       'search'  : None
                   })
@@ -188,6 +160,7 @@ def topArtistsByTag(request):
         artists.append(getTagTopArtists(tag))
 
     tparams = {
+        'title'      : 'xPand | Top Artists',
         'topArtists' : artists,
         'tags'       : tags,
         'form'       : SearchForm()

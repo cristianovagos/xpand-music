@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     {% load staticfiles %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'content/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'content/site.css' %}" />
     <link href="{% static 'fonts/righteous.css' %}" rel="stylesheet">
@@ -21,7 +22,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a href="{% url 'home' %}" class="navbar-brand" style="font-family: 'Righteous', cursive;">
-                    <img src="{% static 'images/panda.png' %}" width="24" height="24">
+                    <img src="{% static 'images/panda-icon.png' %}" width="24" height="24">
                     xPand
                 </a>
             </div>
@@ -53,11 +54,9 @@
     <div class="container body-content">
         {% block content %}
         {% endblock %}
-        <hr/>
-        <footer>
-            <p></p>
-        </footer>
     </div>
+
+    {% include 'footer.html' %}
 
     <script src="{% static 'scripts/jquery-1.10.2.js' %}"></script>
     <script src="{% static 'scripts/bootstrap.js' %}"></script>

@@ -11,7 +11,7 @@
             <div class="item active">
                 <img src="https://media.timeout.com/images/103279271/image.jpg">
                 <div class="carousel-caption">
-                    <h1>Welcome to <font style="font-family: 'Righteous', cursive;">{{ title }}</font></h1>
+                    <h1>Welcome to <font style="font-family: 'Righteous', cursive;">xPand</font></h1>
                     <p class="lead">Your Music Hub.</p>
                 </div>
             </div>
@@ -49,27 +49,38 @@
                         Latest News
                     </a>
                 </h2>
-                {% for x in news %}
-                    <div class="container">
-                        <br>
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <a href="{{ x.link }}">
-                                    <img class="img-rounded" height="110" width="110" src="{{ x.image }}" alt="">
-                                </a>
-                            </div>
-                            <div class="col-sm-8">
-                                <a href="{{ x.link }}" style="color:black">
-                                    <h3 class="media-heading">{{ x.title }}</h3>
-                                </a>
-                                {{ x.description }}
+                <div class="container">
+                    <br>
+                    {% for noticia in news %}
+                        {% if forloop.counter|divisibleby:"2" %}
+                            <div class="row" style="padding-right: 50px;">
+                        {% endif %}
+
+                        <div class="col-sm-5">
+                            <div class="card">
+                                <img class="card-img-top" src="{{ noticia.image }}" height="250" width="300">
+                                <div class="card-block">
+                                    <a href="{{ noticia.link }}">
+                                        <h4 class="card-title" style="width: 300px;">{{ noticia.title }}</h4>
+                                    </a>
+                                    <p class="card-text" style="width: 300px;">{{ noticia.description }}</p>
+                                    <a href="{{ noticia.link }}" class="btn btn-primary">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Read more
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <br>
-                    </div>
-                {% endfor %}
+                        <div class="col-sm-1"></div>
+
+                        {% if forloop.counter|divisibleby:"2" %}
+                            </div>
+                            <br><br>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-        <br>
+            <br>
             <div class="col-md-4 panel panel-default">
                 <div class="nav panel-tabs">
                     <ul class="panel-heading nav nav-pills nav-justified">

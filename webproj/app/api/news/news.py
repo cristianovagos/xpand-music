@@ -8,8 +8,6 @@ def getAllNews(num=25):
     root = tree.getroot()
     result = []
 
-    artist = "Eminem"
-
     i = 0
     for x in root.findall('channel/item'):
         if i >= num:

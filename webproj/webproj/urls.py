@@ -18,11 +18,7 @@ from django.contrib import admin, auth
 from app import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
     url(r'^$', views.home, name='home'),
-    url(r'^contact$', views.contact, name='contact'),
-    url(r'^about', views.about, name='about'),
-    url(r'^login/$', auth.login, name='login'),
     url(r'^topartists/', views.topArtistsByTag, name='topArtists'),
     url(r'^album/(?P<artist>[\w|\W]+)/(?P<album>[\w|\W]+)/$', views.album, name='album'),
     url(r'^artist/(?P<artist>[\w|\W]+)$', views.artist, name='artist'),
