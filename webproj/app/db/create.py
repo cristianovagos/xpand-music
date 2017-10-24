@@ -1,14 +1,20 @@
-from webproj.app.db.BaseXClient import Session
+from .BaseXClient import Session
 
-# create session
-session = Session('localhost', 1984, 'admin', 'admin')
+def createDatabase():
+    # create session
+    print("Initializing session...")
+    session = Session('localhost', 1984, 'admin', 'admin')
 
-try:
-    # create new database
-    session.create("xpand-db", "<artists></artists>")
-    print(session.info())
+    try:
+        # create new database
+        print("Creating a new database...")
+        session.create("xpand-db", "<artists></artists>")
 
-finally:
-    # close session
-    if session:
-        session.close()
+    except Exception as e:
+        print("Oops, something has failed!")
+        print("Exception: " + str(e))
+
+    finally:
+        # close session
+        if session:
+            session.close()

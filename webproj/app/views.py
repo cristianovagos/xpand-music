@@ -78,8 +78,6 @@ def tag(request, tag):
 
     tagObj = Tag(tag, max_items=5)
 
-    print(tagObj)
-
     tparams = {
         'title' : 'xPand | ' + str(tag),
         'tag' : tag,
@@ -98,7 +96,6 @@ def artist(request, artist):
     artistObj = Artist(artist)
 
     if request.method == 'POST':
-        print(str(request.POST['form-type']))
         if request.POST['form-type'] == 'comment-form':
             form = CommentForm(request.POST)
 
@@ -195,8 +192,6 @@ def topArtistsByTag(request):
 def topArtists(request):
     assert isinstance(request, HttpRequest)
 
-    print("topArtists")
-
     tparams = {
         'title': 'xPand | Top Artists',
         'topArtists': getTopArtists(num=50),
@@ -207,8 +202,6 @@ def topArtists(request):
 
 def topArtistsPage(request, page):
     assert isinstance(request, HttpRequest)
-
-    print("topArtistsPage")
 
     tparams = {
         'title': 'xPand | Top Artists',
