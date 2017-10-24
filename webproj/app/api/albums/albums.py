@@ -1,9 +1,9 @@
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
-from webproj.app.api.urls import getTopArtistsURL
+from ..urls import getArtistTopAlbumsURL
 
 def getTopAlbums(artist):
-    file = urlopen( getTopArtistsURL() )
+    file = urlopen( getArtistTopAlbumsURL(artist, limit=6) )
     tree = ET.parse(file)
     root = tree.getroot()
     result = []
@@ -13,6 +13,8 @@ def getTopAlbums(artist):
         aux.append(str(x.find('name').text))
         aux.append(x.find('image[@size="extralarge"]').text)
         result.append(aux)
+
+    print(result)
     return result
 
 

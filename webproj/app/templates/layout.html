@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'content/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'content/site.css' %}" />
     <link href="{% static 'fonts/righteous.css' %}" rel="stylesheet">
+    <link href="{% static 'fonts/cabin.css' %}" rel="stylesheet">
     <script src="{% static 'scripts/modernizr-2.6.2.js' %}"></script>
 </head>
 
@@ -28,9 +29,10 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'news' %}">News</a></li>
                     <li><a href="{% url 'topArtists' %}">Top Artists</a></li>
+                    <li><a href="{% url 'topTags' %}">Top Tags</a></li>
+                    <li><a href="{% url 'topTracks' %}">Top Tracks</a></li>
                 </ul>
 
                 <div class="col-sm-3 col-md-3 navbar-right">

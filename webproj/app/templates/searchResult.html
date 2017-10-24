@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <div class="container">
+    <div class="container" style="padding-bottom: 50px;">
     <br>
         <div class="row">
             {% if search and artistSearch|length == 0 and albumSearch|length == 0 %}
@@ -12,54 +12,60 @@
                     </div>
                 </div>
             {% elif search %}
-                <div class="col-md-8">
-                    <h1>Search results for "{{ search }}":</h1>
-                    <div class="container">
-                        {% if artistSearch|length != 0 %}
-                            <h2>Artists & Tracks</h2>
-                            {% for artist in artistSearch %}
-                                <br>
-                                <div class="row">
-                                    <div class="col-sm-2">
-                                        <a href="{% url 'artist' artist=artist.name %}" style="color:black">
-                                            <img class="img-circle" height="100" width="100" src="{{ artist.image }}">
-                                        </a>
-                                    </div>
-                                    <div class="col-sm">
+                <div class="col-md-12">
+                    <h1>Hey! Good news!<br></h1><h2>Here's what we found for "<font style="color: #4cae4c">{{ search }}</font>":</h2>
+                    <div class="container" style="padding-top: 30px;">
+                        <div class="row">
+                            {% if artistSearch|length != 0 %}
+                                <div class="col-md-6">
+                                    <h2>Artists & Tracks</h2>
+                                    {% for artist in artistSearch %}
                                         <br>
-                                        <a href="{% url 'artist' artist=artist.name %}" style="color:black">
-                                            <h4>{{ artist.name }}</h4>
-                                        </a>
-                                    </div>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <a href="{% url 'artist' artist=artist.name %}" style="color:black">
+                                                    <img class="img-circle" height="100" width="100" src="{{ artist.image }}">
+                                                </a>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <br>
+                                                <a href="{% url 'artist' artist=artist.name %}" style="color:black">
+                                                    <h4>{{ artist.name }}</h4>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <br>
                                 </div>
-                            {% endfor %}
-                            <br>
-                        {% endif %}
+                            {% endif %}
 
-                        {% if albumSearch|length != 0 %}
-                            <h2>Albums</h2>
-                            {% for album in albumSearch %}
-                                <br>
-                                <div class="row">
-                                    <div class="col-sm-2">
-                                        <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
-                                            <img class="img-rounded" height="100" width="100" src="{{ album.image }}">
-                                        </a>
-                                    </div>
-                                    <div class="col-sm">
+                            {% if albumSearch|length != 0 %}
+                                <div class="col-md-6">
+                                    <h2>Albums</h2>
+                                    {% for album in albumSearch %}
                                         <br>
-                                        <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
-                                            <h4>{{ album.name }}</h4>
-                                        </a>
-                                        by
-                                        <a href="{% url 'artist' artist=album.artist %}" style="color:black">
-                                            {{ album.artist }}
-                                        </a>
-                                    </div>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
+                                                    <img class="img-rounded" height="100" width="100" src="{{ album.image }}">
+                                                </a>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <br>
+                                                <a href="{% url 'album' artist=album.artist album=album.name %}" style="color:black">
+                                                    <h4>{{ album.name }}</h4>
+                                                </a>
+                                                by
+                                                <a href="{% url 'artist' artist=album.artist %}" style="font-weight: bold">
+                                                    {{ album.artist }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <br>
                                 </div>
-                            {% endfor %}
-                            <br>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             {% else %}

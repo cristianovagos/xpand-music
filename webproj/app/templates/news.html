@@ -2,30 +2,67 @@
 
 {% block content %}
 
-    <div class="container">
-    <br>
-        <div class="row">
-            <div class="col-md-8">
-                <h2>Latest News</h2>
-                <div class="container">
-                    <!--   INSERT FOR HERE   NEWS-->
-                    {% for x in news %}
-                    <br>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <img class="img-rounded" height="95" width="95" src="{{ x.image }}" alt="">
+    <div style="margin: 0 auto; width: 950px; margin-top: 50px;">
+        <h2><span class="glyphicon glyphicon-bullhorn"></span>&nbsp;News</h2>
+        <br>
+        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for noticia in lastnews %}
+                    {% if forloop.counter == 1 %}
+                        <div class="item active">
+                    {% else %}
+                        <div class="item">
+                    {% endif %}
+                            <img src="{{ noticia.image }}" width="800" height="400" style="top: 55%;">
+                            <div class="carousel-caption"
+                                 style="left: 0; right: 0; bottom: 0; text-align: left; padding: 10px;
+                                 background: rgba(0,0,0,0.6);text-shadow: none;">
+                                <h4><a href="{{ noticia.link }}" style="color: #4cae4c;">{{ noticia.title }}</a></h4>
+                                <p>{{ noticia.description }}</p>
+                            </div>
                         </div>
-                        <div class="col-sm">
-                            <a href="{{ x.link }}" style="color:black"><h4 class="media-heading">{{ x.title }}</h4></a>
-                            {{ x.description }}
-                            <h6>Source: {{ x.author }} ({{ x.pubDate }})</h6>
+                {% endfor %}
+            </div>
 
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </a>
+        </div>
+
+        <div class="container">
+            <br>
+            {% for noticia in news %}
+                {% if forloop.counter > 6 %}
+                    {% if forloop.counter|divisibleby:"2" %}
+                        <div class="row">
+                    {% endif %}
+
+                    <div class="col-sm-5">
+                        <div class="card">
+                            <img class="img-rounded" src="{{ noticia.image }}" height="300" width="300">
+                            <div class="card-block">
+                                <a href="{{ noticia.link }}">
+                                    <h4 class="card-title" style="width: 85%;">{{ noticia.title }}</h4>
+                                </a>
+                                <p class="card-text" style="width: 85%;">{{ noticia.description }}</p>
+                                <a href="{{ noticia.link }}" class="btn btn-primary" style="background-color: #4cae4c; border-color: green">
+                                    <span class="glyphicon glyphicon-edit"></span>
+                                    Read more
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <br>
-                    {% endfor %}
-                </div>
-            </div>
+                    <div class="col-sm-2"></div>
+
+                    {% if forloop.counter|divisibleby:"2" %}
+                        </div>
+                        <br><br>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 

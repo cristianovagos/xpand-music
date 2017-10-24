@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <section style="padding-bottom: 40px;">
+        <div class="container" style="padding-top: 40px;">
+            <div class="row">
+                <ol class="breadcrumb">
+                    <li>Tag</li>
+                    <li class="active">{{ tag }}</li>
+                </ol>
+            </div>
+            <div class="row">
+                <div class="col-md-2 col-md-offset-1">
+                    <h1>{{ tag }}</h1>
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="col-md-7">
+                    <p>{{ wiki }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="padding-top: 30px;">
+            <hr/>
+            <div class="row">
+                <h3 class="text-center">Top Artists</h3>
+                <br>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    {% for artist in topArtists %}
+                        <div class="col-sm-2 text-center">
+                            <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
+                                <img class="img-circle" height="150" width="150" src="{{ artist.2 }}">
+                            </a>
+                            <br><br>
+                            <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
+                                <h4 class="media-heading text-center">
+                                    {{ artist.0 }}
+                                </h4>
+                            </a>
+                        </div>
+                    {% endfor %}
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+            <br><br>
+            <hr/>
+            <div class="row">
+                <h3 class="text-center">Top Albums</h3>
+                <br>
+                <div class="col-md-1"></div>
+                {% for album in topAlbums %}
+                    <div class="col-sm-2 text-center">
+                        <a href="{% url 'album' album=album.0 artist=album.1 %}">
+                            <img class="img-rounded" height="150" width="150" src="{{ album.2 }}">
+                        </a>
+                        <br><br>
+                        <h4 class="media-heading text-center" style="color:black">
+                            <a href="{% url 'album' album=album.0 artist=album.1 %}" style="color:black">"{{ album.0 }}"</a>
+                        </h4>
+                        <h5 class="media-heading text-center">
+                            by
+                            <a href="{% url 'artist' artist=album.1 %}">{{ album.1 }}</a>
+                        </h5>
+                    </div>
+                {% endfor %}
+                <div class="col-md-1"></div>
+            </div>
+            <br><br>
+            <hr/>
+            <div class="row">
+                <h3 class="text-center">Top Tracks</h3>
+                <br>
+                <div class="col-md-1"></div>
+                {% for track in topTracks %}
+                    <div class="col-sm-2 text-center">
+                        <a href="{% url 'artist' artist=track.0 %}">
+                            <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
+                        </a>
+                        <br><br>
+                        <h4 class="media-heading text-center" style="color:black">
+                            "{{ track.1 }}"
+                        </h4>
+                        <h5 class="media-heading text-center">
+                            by
+                            <a href="{% url 'artist' artist=track.0 %}">{{ track.0 }}</a>
+                        </h5>
+                    </div>
+                {% endfor %}
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

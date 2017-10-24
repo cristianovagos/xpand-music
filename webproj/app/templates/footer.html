@@ -3,28 +3,23 @@
     <div class="container">
         <div class="row" style="margin-bottom: 60px;">
             <div class="col-sm-3">
-                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Get started</h5>
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Get Started</h5>
                 <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'news' %}">News</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3">
+                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Tops</h5>
+                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
                     <li><a href="{% url 'topArtists' %}">Top Artists</a></li>
+                    <li><a href="{% url 'topTracks' %}">Top Tracks</a></li>
+                    <li><a href="{% url 'topTags' %}">Top Tags</a></li>
                 </ul>
             </div>
-            <div class="col-sm-3">
-                <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">About us</h5>
-                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
-                    <li><a href="#">Company Information</a></li>
-                    <li><a href="#">Contact us</a></li>
-                    <li><a href="#">Reviews</a></li>
-                </ul>
-            </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3 info" style="text-align: justify; color: #afb0b1;">
                 <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">Support</h5>
-                <ul style="list-style-type: none; padding-left: 0; line-height: 1.7;">
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Help desk</a></li>
-                    <li><a href="#">Forums</a></li>
-                </ul>
+                <p>For support on this app, please talk with the developers. Only they will know what to do to fix the problem.</p>
             </div>
             <div class="col-sm-3 info" style="text-align: justify; color: #afb0b1;">
                 <h5 style="font-size: 18px; color: white; font-weight: bold; margin-top: 30px;">About
@@ -38,7 +33,7 @@
     <div class="second-bar">
        <div class="container">
             <h2 class="logo" style="font-family: Righteous, cursive; margin-top: 10px; ">
-                <a href="#">
+                <a href="{% url 'home' %}">
                     <img src="{% static 'images/panda-icon.png' %}" width="40" height="40">&nbsp;xPand
                 </a>
             </h2>

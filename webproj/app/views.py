@@ -4,6 +4,7 @@ from datetime import datetime
 from urllib.request import urlopen
 from .model.artist import Artist
 from .model.album import Album
+from .model.tag import Tag
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from .api.artists.artists import getTopArtists
@@ -12,6 +13,7 @@ from .api.tracks.tracks import getTopTracks
 from .api.news.news import *
 from .forms import SearchForm, CommentForm
 from .api.tags.tags import *
+from .api.albums.albums import *
 
 
 # Create your views here.
@@ -32,6 +34,7 @@ def home(request):
 def album(request, album, artist):
     assert isinstance(request, HttpRequest)
 
+    artistObj = Artist(str(artist))
     albumObj = Album(str(album), str(artist))
 
     if request.method == 'POST':
@@ -65,9 +68,29 @@ def album(request, album, artist):
         'form' : SearchForm(),
         'commentForm': CommentForm(),
         'comments': albumObj.getComments(),
-        'url' : 'album'
+        'url' : 'album',
+        'topAlbums' : artistObj.getTopAlbums()
     }
     return render(request, 'album.html', tparams)
+
+def tag(request, tag):
+    assert isinstance(request, HttpRequest)
+
+    tagObj = Tag(tag, max_items=5)
+
+    print(tagObj)
+
+    tparams = {
+        'title' : 'xPand | ' + str(tag),
+        'tag' : tag,
+        'form' : SearchForm(),
+        'topAlbums': tagObj.getTopAlbums(),
+        'topTracks': tagObj.getTopTracks(),
+        'topArtists': tagObj.getTopArtists(),
+        'wiki': tagObj.getWikiShort(),
+    }
+
+    return render(request, 'tag.html', tparams)
 
 def artist(request, artist):
     assert isinstance(request, HttpRequest)
@@ -119,7 +142,8 @@ def news(request):
 
     tparams = {
         'title': 'xPand | News',
-        'news' : getAllNews(),
+        'news' : getAllNews(18),
+        'lastnews': getAllNews(6),
         'form' : SearchForm()
     }
     return render(request, 'news.html', tparams)
@@ -160,9 +184,58 @@ def topArtistsByTag(request):
         artists.append(getTagTopArtists(tag))
 
     tparams = {
-        'title'      : 'xPand | Top Artists',
+        'title'      : 'xPand | Top Tags',
         'topArtists' : artists,
         'tags'       : tags,
         'form'       : SearchForm()
     }
+    return render(request, 'toptags.html', tparams)
+
+
+def topArtists(request):
+    assert isinstance(request, HttpRequest)
+
+    print("topArtists")
+
+    tparams = {
+        'title': 'xPand | Top Artists',
+        'topArtists': getTopArtists(num=50),
+        'form': SearchForm(),
+        'page': 1
+    }
     return render(request, 'topartists.html', tparams)
+
+def topArtistsPage(request, page):
+    assert isinstance(request, HttpRequest)
+
+    print("topArtistsPage")
+
+    tparams = {
+        'title': 'xPand | Top Artists',
+        'topArtists': getTopArtists(num=50, page=int(page)),
+        'form': SearchForm(),
+        'page': int(page)
+    }
+    return render(request, 'topartists.html', tparams)
+
+def topTracks(request):
+    assert isinstance(request, HttpRequest)
+
+    tparams = {
+        'title': 'xPand | Top Tracks',
+        'topTracks': getTopTracks(num=50),
+        'form': SearchForm(),
+        'page': 1
+    }
+    return render(request, 'toptracks.html', tparams)
+
+def topTracksPage(request, page):
+    assert isinstance(request, HttpRequest)
+
+    tparams = {
+        'title': 'xPand | Top Tracks',
+        'topTracks': getTopTracks(num=50, page=int(page)),
+        'form': SearchForm(),
+        'page': int(page)
+    }
+    return render(request, 'toptracks.html', tparams)

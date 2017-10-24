@@ -1,6 +1,12 @@
 ﻿body {
     padding-top: 40px;
     padding-bottom: 0px;
+    font-family: 'Cabin', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    font-family: 'Cabin', sans-serif;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -135,25 +141,57 @@ input[type="checkbox"].input-validation-error {
 /* CSS used for positioning the footers at the bottom of the page. */
 /* You can remove this. */
 
-html{
-    height: 100%;
-}
-
-body{
-    display: flex;
-    display: -webkit-flex;
-    flex-direction: column;
-    -webkit-flex-direction: column;
-    height: 100%;
-}
-
-.content{
-   flex: 1 0 auto;
-   -webkit-flex: 1 0 auto;
-   min-height: 200px;
-}
 
 #myFooter{
    flex: 0 0 auto;
    -webkit-flex: 0 0 auto;
+}
+
+a {
+    color: #4cae4c;
+}
+
+a:hover {
+    color: #4cae4c;
+}
+
+.green .active a,
+.green .active a:hover {
+    background-color: #4cae4c;
+}
+
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
+	background-color: #4cae4c;
+}
+
+.pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover,
+.pagination>.active>a:focus, .pagination>.active>span:focus {
+    background-color: #4cae4c;
+    border-color: #4cae4c;
+}
+
+.breadcrumb {
+    font-weight: bold;
+}
+
+.label-info {
+    background-color: #4cae4c;
+    border-color: #4cae4c;
+}
+
+.img-circle {
+    -webkit-border-radius: 99em;
+    -moz-border-radius: 99em;
+    border-radius: 99em;
+    border: 1px solid #eee;
+    box-shadow: 0 3px 2px rgba(0, 0, 0, 0.3);
+}
+
+.img-rounded {
+    border: 1px solid #eee;
+    box-shadow: 0 3px 2px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-inverse .navbar-nav>li>a {
+    font-weight: bold;
 }

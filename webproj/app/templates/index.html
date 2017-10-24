@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block slider %}
+    {% load staticfiles %}
     <div id="myCarousel" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
@@ -9,21 +10,21 @@
         </ol>
         <div class="carousel-inner">
             <div class="item active">
-                <img src="https://media.timeout.com/images/103279271/image.jpg">
+                <img src="{% static 'images/slide1.jpg' %}">
                 <div class="carousel-caption">
                     <h1>Welcome to <font style="font-family: 'Righteous', cursive;">xPand</font></h1>
                     <p class="lead">Your Music Hub.</p>
                 </div>
             </div>
             <div class="item">
-                <img src="https://media.timeout.com/images/103589433/image.jpg">
+                <img src="{% static 'images/slide2.jpg' %}">
                 <div class="carousel-caption">
                     <h1>Know more of your favorite artists</h1>
                     <p class="lead">We collect the best information for you!</p>
                 </div>
             </div>
             <div class="item">
-                <img src="http://insider.ticketmaster.com/wp-content/uploads/iStock-502194833.jpg">
+                <img src="{% static 'images/slide3.jpg' %}">
                 <div class="carousel-caption">
                     <h1>Find out who's on top</h1>
                     <p class="lead">The best artists, songs and albums</p>
@@ -45,7 +46,7 @@
             <div class="col-md-8">
                 <h2>
                     <span class="glyphicon glyphicon-bullhorn"></span>
-                    <a href="/news" style="color:black" >
+                    <a href="{% url 'news' %}">
                         Latest News
                     </a>
                 </h2>
@@ -58,13 +59,13 @@
 
                         <div class="col-sm-5">
                             <div class="card">
-                                <img class="card-img-top" src="{{ noticia.image }}" height="250" width="300">
+                                <img class="img-rounded" src="{{ noticia.image }}" height="250" width="250">
                                 <div class="card-block">
                                     <a href="{{ noticia.link }}">
-                                        <h4 class="card-title" style="width: 300px;">{{ noticia.title }}</h4>
+                                        <h4 class="card-title" style="width: 100%;">{{ noticia.title }}</h4>
                                     </a>
-                                    <p class="card-text" style="width: 300px;">{{ noticia.description }}</p>
-                                    <a href="{{ noticia.link }}" class="btn btn-primary">
+                                    <p class="card-text" style="width: 100%;">{{ noticia.description }}</p>
+                                    <a href="{{ noticia.link }}" class="btn btn-primary" style="background-color: #4cae4c; border-color: #4cae4c">
                                         <span class="glyphicon glyphicon-edit"></span>
                                         Read more
                                     </a>
@@ -83,9 +84,11 @@
             <br>
             <div class="col-md-4 panel panel-default">
                 <div class="nav panel-tabs">
-                    <ul class="panel-heading nav nav-pills nav-justified">
-                        <li role="presentation" class="active" ><a href="#artists" data-toggle="tab">Top Artists</a></li>
-                        <li role="presentation"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
+                    <ul class="panel-heading nav nav-pills nav-justified green">
+                        <li role="presentation" class="active" style="font-weight: bold">
+                            <a href="#artists" data-toggle="tab">Top Artists</a>
+                        </li>
+                        <li role="presentation" style="font-weight: bold"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
                     </ul>
                 </div>
                 <div class="panel-body">
@@ -97,11 +100,11 @@
                                     <br>
                                     <div class="row">
                                         <div class="col-sm-3">
-                                            <img class="img-circle" height="60" width="60" src="{{ artista.1 }}" alt="">
+                                            <img class="img-circle" height="60" width="60" src="{{ artista.1 }}">
                                         </div>
                                         <div class="col-sm-8">
                                             <br>
-                                            <a href="/artist/{{ artista.0 }}" style="color:black">
+                                            <a href="{% url 'artist' artist=artista.0 %}" style="color: black">
                                                 <h4 class="media-heading">{{ artista.0 }}</h4>
                                             </a>
                                         </div>
@@ -116,12 +119,12 @@
                                     <br>
                                     <div class="row">
                                         <div class="col-sm-3">
-                                            <img class="img-rounded" height="60" width="60" src="{{ track.2 }}" alt="">
+                                            <img class="img-rounded" height="60" width="60" src="{{ track.2 }}">
                                         </div>
                                         <div class="col-sm-8">
                                             <h3 class="media-heading">{{ track.1 }}</h3>
                                             by
-                                            <a href="/artist/{{ track.0 }}">
+                                            <a href="{% url 'artist' artist=track.0 %}" style="font-weight: bold">
                                                 {{ track.0 }}
                                             </a>
                                         </div>
@@ -134,5 +137,4 @@
             </div>
         </div>
     </div>
-
 {% endblock %}

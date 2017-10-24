@@ -6,7 +6,7 @@
             <div class="row">
                 <ol class="breadcrumb">
                     <li>Artist</li>
-                    <li class="active"><a href="/artist/{{ name }}">{{ name }}</a></li>
+                    <li class="active"><a href="{% url 'artist' artist=name %}">{{ name }}</a></li>
                 </ol>
             </div>
             <br>
@@ -16,10 +16,14 @@
                 </div>
                 <div class="col-md-7">
                     <h1>{{ name }}</h1>
-                    <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                    {% for tag in tags %}
-                        <a href="#"><span class="label label-info">{{ tag }}</span></a>
-                    {% endfor %}
+                    {% if tags|length > 1 %}
+                        <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                        {% for tag in tags %}
+                            <a href="{% url 'tag' tag=tag %}">
+                                <span class="label label-info">{{ tag }}</span>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
                     <br><br>
                     <p>{{ summary }}</p>
                 </div>
@@ -31,30 +35,51 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-sm-4"><h4 align="center">Top Albums</h4>
-                        <ul>
-                        {% for x in top5 %}
+                    <div class="col-sm-4">
+                        <h4 align="center">Top Albums</h4>
+                        {% for album in top5 %}
                             <br>
-                            <img class="img-rounded" src="{{ x.1 }}" height="84" width="84"> <a href="/album/{{ name }}/{{ x.0 }}"> {{ x.0 }}</a>
-                            <br>
-                        {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="col-sm-4" align="left"><h4 align="center">Top Songs</h4>
-                        <ul>
-                        {% for x in songs5 %}
-                            <br>
-                            <img class="img-rounded" src="{{ x.1 }}" height="84" width="84">
-                            {{ x.0 }}
+                            <div class="row">
+                                <div class="col-sm-5 text-right">
+                                    <img class="img-rounded" src="{{ album.1 }}" height="84" width="84">
+                                </div>
+                                <div class="col-sm-5" style="top: 50%;">
+                                    <br>
+                                    <a href="{% url 'album' artist=name album=album.0 %}" style="font-weight: bold; color:black">{{ album.0 }}</a>
+                                </div>
+                            </div>
                             <br>
                         {% endfor %}
-                        </ul>
                     </div>
-                    <div class="col-sm-3" align="left"><h4 align="center">Related</h4>
-                       {% for x in similars %}
+                    <div class="col-sm-4">
+                        <h4 align="center">Top Songs</h4>
+                        {% for song in songs5 %}
                             <br>
-                            <img class="img-circle" src="{{ x.1 }}" height="84" width="84">
-                            <a href="/artist/{{ x.0 }}"> {{ x.0 }}</a>
+                            <div class="row">
+                                <div class="col-sm-5 text-right">
+                                    <img class="img-rounded" src="{{ song.1 }}" height="84" width="84">
+                                </div>
+                                <div class="col-sm-5">
+                                    <br>
+                                    {{ song.0 }}
+                                </div>
+                            </div>
+                            <br>
+                        {% endfor %}
+                    </div>
+                    <div class="col-sm-4">
+                        <h4 align="center">Related</h4>
+                        {% for artist in similars %}
+                            <br>
+                            <div class="row">
+                                <div class="col-sm-5 text-right">
+                                    <img class="img-circle" src="{{ artist.1 }}" height="84" width="84">
+                                </div>
+                                <div class="col-sm-5">
+                                    <br>
+                                    <a href="{% url 'artist' artist=artist.0 %}" style="font-weight: bold; color:black">{{ artist.0 }}</a>
+                                </div>
+                            </div>
                             <br>
                        {% endfor %}
                     </div>
@@ -67,17 +92,16 @@
             <div class="container">
             <h2>Latest News from {{ name }}</h2>
                 <!--   INSERT FOR HERE   NEWS-->
-                {% for x in news %}
+                {% for noticia in news %}
                 <br>
                 <div class="row">
                     <div class="col-sm-2">
-                        <img class="img-rounded" height="95" width="95" src="{{ x.image }}" alt="">
+                        <img class="img-rounded" height="95" width="95" src="{{ noticia.image }}" alt="{{ noticia.title }}">
                     </div>
                     <div class="col-sm">
-                        <a href="{{ x.link }}" style="color:black"><h4 class="media-heading">{{ x.title }}</h4></a>
-                        {{ x.description }}
-                        <h6>Source: {{ x.author }} ({{ x.pubDate }})</h6>
-
+                        <a href="{{ noticia.link }}" style="color:black"><h4 class="media-heading">{{ noticia.title }}</h4></a>
+                        {{ noticia.description }}
+                        <h6>Source: {{ noticia.author }} ({{ noticia.pubDate }})</h6>
                     </div>
                 </div>
                 <br>
@@ -86,6 +110,6 @@
         </div>
         {% endif %}
     </section>
-
+    <br><br>
     {% include 'comment.html' %}
 {% endblock %}

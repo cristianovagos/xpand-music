@@ -278,6 +278,7 @@ class Album:
 
         except Exception as e:
             print("changeComment")
+            print(e)
             print("Something failed on XML Database!")
 
         finally:
@@ -300,6 +301,7 @@ class Album:
 
         except Exception as e:
             print("deleteComment")
+            print(e)
             print("Something failed on XML Database!")
 
         finally:
@@ -340,6 +342,7 @@ class Album:
 
         except Exception as e:
             print("comment")
+            print(e)
             print("Something failed on XML Database!")
 
         finally:

@@ -16,13 +16,17 @@
                 </div>
                 <div class="col-md-7">
                     <h1 class="my-4">{{ album }}<br>
-                        <small>by <a href="{% url 'artist' artist=artist %}"> {{ artist }}</a></small>
+                        <small>by <a href="{% url 'artist' artist=artist %}" style="font-weight: bold"> {{ artist }}</a></small>
                     </h1>
-                    <br>
-                    <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                    {% for tag in tags %}
-                        <a href="#"><span class="label label-info">{{ tag }}</span></a>
-                    {% endfor %}
+                    {% if tags|length > 1 %}
+                        <br>
+                        <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                        {% for tag in tags %}
+                            <a href="{% url 'tag' tag=tag %}">
+                                <span class="label label-info" style="background-color: #4cae4c">{{ tag }}</span>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
                     <br><br>
                     <p>{{ wiki }}</p>
                 </div>
@@ -31,10 +35,17 @@
         <div class="container" style="padding-top: 30px">
             <hr>
             <div class="row">
-                <h3 class="my-3">
-                    Tracks in {{ album }}:
-                </h3>
-                <div class="col-md-6">
+                <div class="col-md-5">
+                    <h3>
+                        Tracks in {{ album }}:
+                    </h3>
+                </div>
+                <div class="col-md-5 col-md-offset-2" style="margin-top: 20px;">
+                    <h4>More albums by <a href="{% url 'artist' artist=artist %}">{{ artist }}</a>:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
                     <ul class="list-group">
                         {% for track in tracks %}
                              <a href="#" class="list-group-item">
@@ -44,8 +55,33 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="col-md-5">
-                    <!-- inserir aqui alguma coisa para encher tipo outros albuns do artista -->
+                <div class="col-md-5 col-md-offset-2">
+                    <div class="col-md-9 panel panel-default">
+                        <div class="panel-body">
+                            <div class="tab-content clearfix">
+                                <div class="tab-pane panel-body active" id="albums">
+                                    <div class="container" style="padding-left: 5px; padding-right: 5px;">
+                                        {% for topAlbum in topAlbums %}
+                                            {% if topAlbum.0 != album %}
+                                                <br>
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <img class="img-rounded" height="70" width="70" src="{{ topAlbum.1 }}">
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <br>
+                                                        <a href="{% url 'album' artist=artist album=topAlbum.0 %}" style="color: black">
+                                                            <h4 class="media-heading">{{ topAlbum.0 }}</h4>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

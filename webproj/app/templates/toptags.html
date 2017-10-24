@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container" style="padding-top: 40px;">
+            <div class="row">
+                <ol class="breadcrumb">
+                    <li>Top</li>
+                    <li class="active">Top Tags</li>
+                </ol>
+            </div>
+        </div>
+    <div style="width:800px; margin:0 auto;">
+        <div class="container">
+        <br>
+            <div class="row">
+                <h1 align="center">Top Tags</h1>
+                <div class="container">
+                    {% for tag in tags %}
+                        <br>
+                        <a href="{% url 'tag' tag=tag %}">
+                            <h2>{{ tag }}</h2>
+                        </a>
+                        <br>
+                        {% for artist in topArtists %}
+                            <div class="row">
+                            {% for key in artist %}
+                                {% if key.tag == tag %}
+                                    <div class="col-sm-3 text-center">
+                                        <a href="{% url 'artist' artist=key.name %}">
+                                            <img class="img-circle" height="150" width="150" src="{{ key.image }}">
+                                        </a>
+                                        <br><br>
+                                        <a href="{% url 'artist' artist=key.name %}" style="color: black;">
+                                            <h4 class="media-heading text-center">
+                                                {{ key.name }}
+                                            </h4>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <br>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
