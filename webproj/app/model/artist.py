@@ -1,4 +1,6 @@
 import html
+import os
+import lxml.etree as ETree
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
 from urllib.request import urlopen
@@ -35,9 +37,11 @@ class Artist:
             self.fetchInfoDatabase()
         else:
             print('Fetching from API')
-            self.fetchInfo()
-            if store:
-                self.putInDatabase()
+            #self.fetchInfo()
+            #if store:
+            #self.putInDatabase()
+            self.transformArtist()
+
 
     def fetchInfoDatabase(self):
         result = False
@@ -257,6 +261,108 @@ class Artist:
         finally:
             if session:
                 session.close()
+
+    def transformArtist(self):
+        print("Transforming Artist...")
+
+        try:
+            url = urlopen( getArtistInfoURL(quote(self.name)) )
+        except HTTPError:
+            print('Artist doesn\'t exist!')
+            self.artistExists = False
+        else:
+            currentPath = os.getcwd()
+
+            # Obtencao dos XML Schemas
+            xmlSchemaArtista_doc = ETree.parse(open(currentPath + '/app/xml/schArtist.xsd', 'r'))
+            xmlSchemaArtista_doc = ETree.XMLSchema(xmlSchemaArtista_doc)
+
+            xmlSchemaTopAlb_doc = ETree.parse(open(currentPath + '/app/xml/schTopAlbums.xsd', 'r'))
+            xmlSchemaTopAlb_doc = ETree.XMLSchema(xmlSchemaTopAlb_doc)
+
+            xmlSchemaTopTra_doc = ETree.parse(open(currentPath + '/app/xml/schTopTracks.xsd', 'r'))
+            xmlSchemaTopTra_doc = ETree.XMLSchema(xmlSchemaTopTra_doc)
+
+            # Transformacao do artista
+            xmlParsed = ETree.parse(url)
+            artistXSLT = ETree.parse(open(currentPath + '/app/xml/transformArtist.xsl', 'r'))
+            transform = ETree.XSLT(artistXSLT)
+            finalArtist = transform(xmlParsed)
+
+            finalArtist = str.replace(str(finalArtist), '<?xml version="1.0"?>', '')
+
+            # Transformacao do TopAlbuns
+            url = urlopen( getArtistTopAlbumsURL(quote(self.name), self.max_items) )
+            xmlParsed = ETree.parse(url)
+            topAlbumsXSLT = ETree.parse(open(currentPath + '/app/xml/transformArtistTopAlbums.xsl', 'r'))
+            transform = ETree.XSLT(topAlbumsXSLT)
+            topAlbums = transform(xmlParsed)
+
+            topAlbums = str.replace(str(topAlbums), '<?xml version="1.0"?>', '')
+
+            # Transformacao das TopTracks
+            url = urlopen(getArtistTopTracksURL(quote(self.name), self.max_items))
+            xmlParsed = ETree.parse(url)
+            topAlbumsXSLT = ETree.parse(open(currentPath + '/app/xml/transformArtistTopTracks.xsl', 'r'))
+            transform = ETree.XSLT(topAlbumsXSLT)
+            topTracks = transform(xmlParsed)
+
+            topTracks = str.replace(str(topTracks), '<?xml version="1.0"?>', '')
+
+
+            if xmlSchemaArtista_doc.validate(ETree.fromstring(finalArtist)) \
+                and xmlSchemaTopAlb_doc.validate(ETree.fromstring(topAlbums)) \
+                and xmlSchemaTopTra_doc.validate(ETree.fromstring(topTracks)):
+
+                print("Artist is valid!")
+                print("Inserting artist in database...")
+
+                #preparar para inserir na bd
+                session = Session('localhost', 1984, 'admin', 'admin')
+
+                try:
+                    query = "let $artists := collection('xpand-db')/artists " + \
+                            "let $node := " + str(finalArtist) + " " +\
+                            "return insert node $node into $artists "
+
+                    queryObj = session.query(query)
+
+                    queryObj.execute()
+
+                    queryObj.close()
+
+                    query = "let $artists := collection('xpand-db')/artists " + \
+                            "let $artist := $artists/artist[name='" + self.name + "']/topAlbums " + \
+                            "let $node := " + str(topAlbums) + " " + \
+                            "return replace node $artist with $node "
+
+                    queryObj = session.query(query)
+
+                    queryObj.execute()
+
+                    queryObj.close()
+
+                    query = "let $artists := collection('xpand-db')/artists " + \
+                            "let $artist := $artists/artist[name='" + self.name + "']/topTracks " + \
+                            "let $node := " + str(topTracks) + " " + \
+                            "return replace node $artist with $node "
+
+                    queryObj = session.query(query)
+
+                    queryObj.execute()
+
+                    queryObj.close()
+
+                except Exception as e:
+                    print("Something failed on XML Database!")
+                    print(e)
+
+                finally:
+                    print("Completed.")
+                    if session:
+                        session.close()
+                    self.fetchInfoDatabase()
+
 
     def fetchInfo(self):
         try:

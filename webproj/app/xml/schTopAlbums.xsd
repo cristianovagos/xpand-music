@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="topAlbums" type="topAlbumType"/>
+
+    <xs:complexType name="topAlbumType">
+        <xs:sequence>
+            <xs:element name="topAlbum" type="topAlbumsType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="topAlbumsType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="image"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

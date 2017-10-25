@@ -1,3 +1,5 @@
+import os
+import lxml.etree as ETree
 import html
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
@@ -31,9 +33,60 @@ class Album:
             self.fetchInfoDatabase()
         else:
             print('Fetching from API')
-            self.fetchInfo()
-            self.putInDatabase()
+            # self.fetchInfo()
+            # self.putInDatabase()
+            self.transformAlbum()
 
+    def transformAlbum(self):
+        print("Transforming Album...")
+        try:
+            url = urlopen(getAlbumInfoURL(quote(self.artist), quote(self.name)))
+        except HTTPError:
+            print('Album doesn\'t exist!')
+            self.albumExists = False
+        else:
+            currentPath = os.getcwd()
+
+            # Obtencao do XML Schema
+            xmlSchemaAlbum_doc = ETree.parse(open(currentPath + '/app/xml/schAlbum.xsd', 'r'))
+            xmlSchemaAlbum_doc = ETree.XMLSchema(xmlSchemaAlbum_doc)
+
+            # Transformacao do album
+            xmlParsed = ETree.parse(url)
+            albumXSLT = ETree.parse(open(currentPath + '/app/xml/transformAlbum.xsl', 'r'))
+            transform = ETree.XSLT(albumXSLT)
+            finalAlbum = transform(xmlParsed)
+
+            finalAlbum = str.replace(str(finalAlbum), '<?xml version="1.0"?>', '')
+
+            if xmlSchemaAlbum_doc.validate(ETree.fromstring(finalAlbum)):
+                print("Album is valid!")
+                print("Inserting album in database...")
+
+                #preparar para inserir na bd
+                session = Session('localhost', 1984, 'admin', 'admin')
+
+                try:
+                    query = "let $artists := collection('xpand-db')//artist " + \
+                            "let $albums := $artists[name='" + self.artist + "']/albums " + \
+                            "let $node := " + str(finalAlbum) + " " + \
+                            "return insert node $node into $albums "
+
+                    queryObj = session.query(query)
+
+                    queryObj.execute()
+
+                    queryObj.close()
+
+                except Exception as e:
+                    print("Something failed on XML Database!")
+                    print(e)
+
+                finally:
+                    print("Completed.")
+                    if session:
+                        session.close()
+                    self.fetchInfoDatabase()
 
     def fetchInfoDatabase(self):
         result = False
