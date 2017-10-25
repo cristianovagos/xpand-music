@@ -87,8 +87,8 @@ class Artist:
                     else:
                         self.biographyFull = self.noBioText
 
-                    if tag.findall('similar/artist'):
-                        for artist in tag.findall('similar/artist'):
+                    if tag.findall('similar/similarartist'):
+                        for artist in tag.findall('similar/similarartist'):
                             if artist:
                                 similar = []
 
@@ -208,10 +208,10 @@ class Artist:
                     "<similar>"
 
             for similarArtist in self.similarArtists:
-                query += "<artist>" + \
+                query += "<similarartist>" + \
                          "<name>" + html.escape(similarArtist[0]) + "</name>" + \
                          "<image>" + similarArtist[1] + "</image>" + \
-                         "</artist>"
+                         "</similarartist>"
 
             query += "</similar>" + \
                      "<albums></albums>" + \

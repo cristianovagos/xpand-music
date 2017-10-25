@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="artists" type="artistsType"/>
+  <xs:complexType name="topAlbumsType">
+    <xs:sequence>
+      <xs:element type="topAlbumType" name="topAlbum" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="topTracksType">
+    <xs:sequence>
+      <xs:element type="topTrackType" name="topTrack" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="artistsType">
+    <xs:sequence>
+      <xs:element type="artistType" name="artist" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="trackType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="albumsType">
+    <xs:sequence>
+      <xs:element type="albumType" name="album" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="tagsType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="tag" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="albumType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="mbid" minOccurs="0"/>
+      <xs:element type="xs:string" name="image"/>
+      <xs:element type="xs:string" name="wikiShort"/>
+      <xs:element type="xs:string" name="wikiFull"/>
+      <xs:element type="tracksType" name="tracks"/>
+      <xs:element type="tagsType" name="tags" minOccurs="0"/>
+      <xs:element type="commentsType" name="comments" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="artistType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="mbid" minOccurs="0"/>
+      <xs:element type="xs:string" name="image"/>
+      <xs:element type="xs:string" name="bioShort"/>
+      <xs:element type="xs:string" name="bioFull"/>
+      <xs:element type="similarType" name="similar" minOccurs="0"/>
+      <xs:element type="albumsType" name="albums" minOccurs="0"/>
+      <xs:element type="topAlbumsType" name="topAlbums" minOccurs="0"/>
+      <xs:element type="topTracksType" name="topTracks" minOccurs="0"/>
+      <xs:element type="tagsType" name="tags" minOccurs="0"/>
+      <xs:element type="commentsType" name="comments" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="similarType">
+    <xs:sequence>
+      <xs:element type="similarArtistType" name="similarartist" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="tracksType">
+    <xs:sequence>
+      <xs:element type="trackType" name="track" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="topTrackType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="image"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="topAlbumType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="image"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="commentsType">
+    <xs:sequence>
+      <xs:element type="commentType" name="comment" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="commentType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="id"/>
+      <xs:element type="xs:string" name="user"/>
+      <xs:element type="xs:string" name="text"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="similarArtistType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="image"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
