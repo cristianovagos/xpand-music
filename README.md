@@ -2,13 +2,15 @@
 
 A project made for EDC (Engenharia de Dados e Conhecimento) course of MIECT, at DETI-UA (University of Aveiro).
 
-Our main goal for this project is to put in practise the subjects learned throughout the course, mainly Django and the use of XML and XML related tools and techniques, such as XML Schema, XSLT, XPath, XQuery and XUpdate as well as the use of a XML database (in our case we chose BaseX) to store and retrieve data from a XML document.
+Our main goal for this project is to put in practise the subjects learned throughout the first part of this course, mainly the use of Django and of XML and XML related tools and XML' derivated technologies such as XML Schema, XSLT, XPath, XQuery and XUpdate as well as the use of a XML database (in our case we chose BaseX) to store and retrieve data from a XML document.
 
-So, xPand (as we agreed to call this project) uses the Last.fm XML API to fetch data from artists, tracks, albums and charts to collect data, and then transforms the XML fetched to our structure, validates it according to our XML Schema to make sure it has the structure we want, and then stores the data collected on the BaseX database.
+So, xPand Music (as we agreed to call this project, a way of Expanding Music knowledge) uses the Last.fm XML API to fetch data from artists, tracks, albums and charts to collect data, transforms the XML fetched to our structure using XSLT, validates it according to our XML Schema to make sure it has the structure we want, and then stores the data collected on the BaseX database.
 
 The data is fetched from API only when the data itself is not present within the database. When it fetches and adds the data, the app will then display the data in a pretty way using also Bootstrap in the web design for Artists, Albums, Tags and Charts.
 
 NOTE: This project may be incomplete and it surely needs more attention and features, but that's what we could do for the deadline provided of the course.
+
+Final grade: 19/20
 
 ### Developers and collaborators:
 - [Cristiano Vagos](http://github.com/cristianovagos)
