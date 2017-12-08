@@ -20,74 +20,86 @@
             </div>
         </div>
         <div class="container" style="padding-top: 30px;">
-            <hr/>
-            <div class="row">
-                <h3 class="text-center">Top Artists</h3>
-                <br>
-                <div class="row">
-                    <div class="col-md-1"></div>
-                    {% for artist in topArtists %}
-                        <div class="col-sm-2 text-center">
-                            <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
-                                <img class="img-circle" height="150" width="150" src="{{ artist.2 }}">
-                            </a>
-                            <br><br>
-                            <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
-                                <h4 class="media-heading text-center">
-                                    {{ artist.0 }}
-                                </h4>
-                            </a>
+            {% if topArtists|length > 0 and topAlbums|length > 0 and topTracks|length > 0 %}
+                <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">
+                    Sorry, we have no data about this tag.<br><br>Please, try again soon.
+                </h3>
+            {% else %}
+                {% if topArtists|length > 0 %}
+                    <hr/>
+                    <div class="row">
+                        <h3 class="text-center">Top Artists</h3>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            {% for artist in topArtists %}
+                                <div class="col-sm-2 text-center">
+                                    <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
+                                        <img class="img-circle" height="150" width="150" src="{{ artist.1 }}">
+                                    </a>
+                                    <br><br>
+                                    <a href="{% url 'artist' artist=artist.0 %}" style="color:black">
+                                        <h4 class="media-heading text-center">
+                                            {{ artist.0 }}
+                                        </h4>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                            <div class="col-md-1"></div>
                         </div>
-                    {% endfor %}
-                    <div class="col-md-1"></div>
-                </div>
-            </div>
-            <br><br>
-            <hr/>
-            <div class="row">
-                <h3 class="text-center">Top Albums</h3>
-                <br>
-                <div class="col-md-1"></div>
-                {% for album in topAlbums %}
-                    <div class="col-sm-2 text-center">
-                        <a href="{% url 'album' album=album.0 artist=album.1 %}">
-                            <img class="img-rounded" height="150" width="150" src="{{ album.2 }}">
-                        </a>
-                        <br><br>
-                        <h4 class="media-heading text-center" style="color:black">
-                            <a href="{% url 'album' album=album.0 artist=album.1 %}" style="color:black">"{{ album.0 }}"</a>
-                        </h4>
-                        <h5 class="media-heading text-center">
-                            by
-                            <a href="{% url 'artist' artist=album.1 %}">{{ album.1 }}</a>
-                        </h5>
                     </div>
-                {% endfor %}
-                <div class="col-md-1"></div>
-            </div>
-            <br><br>
-            <hr/>
-            <div class="row">
-                <h3 class="text-center">Top Tracks</h3>
-                <br>
-                <div class="col-md-1"></div>
-                {% for track in topTracks %}
-                    <div class="col-sm-2 text-center">
-                        <a href="{% url 'artist' artist=track.0 %}">
-                            <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
-                        </a>
-                        <br><br>
-                        <h4 class="media-heading text-center" style="color:black">
-                            "{{ track.1 }}"
-                        </h4>
-                        <h5 class="media-heading text-center">
-                            by
-                            <a href="{% url 'artist' artist=track.0 %}">{{ track.0 }}</a>
-                        </h5>
+                    <br><br>
+                {% endif %}
+                {% if topAlbums|length > 0 %}
+                    <hr/>
+                    <div class="row">
+                        <h3 class="text-center">Top Albums</h3>
+                        <br>
+                        <div class="col-md-1"></div>
+                        {% for album in topAlbums %}
+                            <div class="col-sm-2 text-center">
+                                <a href="{% url 'album' album=album.0 artist=album.1 %}">
+                                    <img class="img-rounded" height="150" width="150" src="{{ album.2 }}">
+                                </a>
+                                <br><br>
+                                <h4 class="media-heading text-center" style="color:black">
+                                    <a href="{% url 'album' album=album.0 artist=album.1 %}" style="color:black">"{{ album.0 }}"</a>
+                                </h4>
+                                <h5 class="media-heading text-center">
+                                    by
+                                    <a href="{% url 'artist' artist=album.1 %}">{{ album.1 }}</a>
+                                </h5>
+                            </div>
+                        {% endfor %}
+                        <div class="col-md-1"></div>
                     </div>
-                {% endfor %}
-                <div class="col-md-1"></div>
-            </div>
+                    <br><br>
+                {% endif %}
+                {% if topTracks|length > 0 %}
+                    <hr/>
+                    <div class="row">
+                        <h3 class="text-center">Top Tracks</h3>
+                        <br>
+                        <div class="col-md-1"></div>
+                        {% for track in topTracks %}
+                            <div class="col-sm-2 text-center">
+                                <a href="{% url 'artist' artist=track.0 %}">
+                                    <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
+                                </a>
+                                <br><br>
+                                <h4 class="media-heading text-center" style="color:black">
+                                    "{{ track.1 }}"
+                                </h4>
+                                <h5 class="media-heading text-center">
+                                    by
+                                    <a href="{% url 'artist' artist=track.0 %}">{{ track.0 }}</a>
+                                </h5>
+                            </div>
+                        {% endfor %}
+                        <div class="col-md-1"></div>
+                    </div>
+                {% endif %}
+            {% endif %}
         </div>
     </section>
 {% endblock %}

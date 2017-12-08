@@ -15,7 +15,19 @@
                     <img class="img-circle" src="{{ image }}">
                 </div>
                 <div class="col-md-7">
-                    <h1>{{ name }}</h1>
+                    <h1>
+                        {{ name }}
+                        {% if gender %}
+                            {% if gender == 'male' %}
+                                &nbsp;<img src="../static/images/male.png" width="20" height="20">
+                            {% else %}
+                                &nbsp;<img src="../static/images/female.png" width="20" height="20">
+                            {% endif %}
+                        {% endif %}
+                        {% if country %}
+                            <img src="../static/images/blank.gif" class="flag flag-{{ countryCode }}" alt="{{ country }}" />
+                        {% endif %}
+                    </h1>
                     {% if tags|length > 1 %}
                         <span class="glyphicon glyphicon-tags"></span>&nbsp;
                         {% for tag in tags %}
@@ -25,67 +37,142 @@
                         {% endfor %}
                     {% endif %}
                     <br><br>
-                    <p>{{ summary }}</p>
+                    <p>{{ summary }}<br><br></p>
+                    {% if givenName %}
+                        <p><b>Given Name: </b>{{ givenName }}</p>
+                    {% endif %}
+                    {% if birthDate %}
+                        <p><b>Born: </b>{{ birthDate }}</p>
+                    {% endif %}
+                    {% if yearFounded %}
+                        <p><b>Founded in: </b>{{ yearFounded }}</p>
+                    {% endif %}
+                    {% if occupations %}
+                        <p>
+                            <b>Occupation:</b>
+                            {% for occupation in occupations %}
+                                {{ occupation }}
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if genres %}
+                        <p>
+                            <b>Genres:</b>
+                            {% for genre in genres %}
+                                <a href="{% url 'tag' tag=genre %}">{{ genre }}</a>
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if recorders %}
+                        <p>
+                            <b>Record Label:</b>
+                            {% for recorder in recorders %}
+                                {{ recorder }}
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if members %}
+                        <p>
+                            <b>Band Members:</b>
+                            {% for member in members %}
+                                <a href="{% url 'artist' artist=member %}">{{ member }}</a>
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if website %}
+                        <p><b>Official Website: </b><a href="{{ website }}">{{ website }}</a></p>
+                    {% endif %}
                 </div>
                 <br>
             </div>
         </div>
         <br>
         <br>
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <h4 align="center">Top Albums</h4>
-                        {% for album in top5 %}
-                            <br>
-                            <div class="row">
-                                <div class="col-sm-5 text-right">
-                                    <img class="img-rounded" src="{{ album.1 }}" height="84" width="84">
-                                </div>
-                                <div class="col-sm-5" style="top: 50%;">
+        {% if topAlbums|length > 0 and songs5|length > 0 and similars|length > 0 %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            {% if topAlbums|length > 0 %}
+                                <h4 align="center">Top Albums</h4>
+                                {% for album in topAlbums %}
                                     <br>
-                                    <a href="{% url 'album' artist=name album=album.0 %}" style="font-weight: bold; color:black">{{ album.0 }}</a>
-                                </div>
-                            </div>
-                            <br>
-                        {% endfor %}
-                    </div>
-                    <div class="col-sm-4">
-                        <h4 align="center">Top Songs</h4>
-                        {% for song in songs5 %}
-                            <br>
-                            <div class="row">
-                                <div class="col-sm-5 text-right">
-                                    <img class="img-rounded" src="{{ song.1 }}" height="84" width="84">
-                                </div>
-                                <div class="col-sm-5">
+                                    <div class="row">
+                                        <div class="col-sm-5 text-right">
+                                            <img class="img-rounded" src="{{ album.1 }}" height="84" width="84">
+                                        </div>
+                                        <div class="col-sm-5" style="top: 50%;">
+                                            <br>
+                                            <a href="{% url 'album' artist=name album=album.0 %}" style="font-weight: bold; color:black">{{ album.0 }}</a>
+                                        </div>
+                                    </div>
                                     <br>
-                                    {{ song.0 }}
-                                </div>
-                            </div>
-                            <br>
-                        {% endfor %}
-                    </div>
-                    <div class="col-sm-4">
-                        <h4 align="center">Related</h4>
-                        {% for artist in similars %}
-                            <br>
-                            <div class="row">
-                                <div class="col-sm-5 text-right">
-                                    <img class="img-circle" src="{{ artist.1 }}" height="84" width="84">
-                                </div>
-                                <div class="col-sm-5">
+                                {% endfor %}
+                            {% else %}
+                                <h4 align="center">Sorry, we don't have any album of this artist yet.</h4>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            {% if songs5|length > 0 %}
+                                <h4 align="center">Top Songs</h4>
+                                {% for song in songs5 %}
                                     <br>
-                                    <a href="{% url 'artist' artist=artist.0 %}" style="font-weight: bold; color:black">{{ artist.0 }}</a>
-                                </div>
-                            </div>
-                            <br>
-                       {% endfor %}
+                                    <div class="row">
+                                        <div class="col-sm-5 text-right">
+                                            <img class="img-rounded" src="{{ song.1 }}" height="84" width="84">
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <br>
+                                            {{ song.0 }}
+                                        </div>
+                                    </div>
+                                    <br>
+                                {% endfor %}
+                            {% else %}
+                                <h4 align="center">Sorry, we don't have any song of this artist yet.</h4>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            {% if songs5|length > 0 %}
+                                <h4 align="center">Related</h4>
+                                {% for artist in similars %}
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-sm-5 text-right">
+                                            <img class="img-circle" src="{{ artist.1 }}" height="84" width="84">
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <br>
+                                            <a href="{% url 'artist' artist=artist.0 %}" style="font-weight: bold; color:black">{{ artist.0 }}</a>
+                                        </div>
+                                    </div>
+                                    <br>
+                               {% endfor %}
+                            {% else %}
+                                <h4 align="center">Sorry, we don't have any artist related to this artist yet.</h4>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <h4 class="text-center"><br>Sorry, we don't have yet more data about this artist.
+                <br><br>
+                Please try again soon.
+            </h4>
+        {% endif %}
         <br><br>
         {% if lengthNews != 0 %}
         <div style="width:800px; margin:0 auto;">

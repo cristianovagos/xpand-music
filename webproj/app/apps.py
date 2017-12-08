@@ -4,6 +4,3 @@ from .db.create import *
 
 class AppConfig(AppConfig):
     name = 'app'
-
-    def ready(self):
-        createDatabase()

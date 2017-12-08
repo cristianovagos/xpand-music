@@ -1,14 +1,14 @@
-import os
-import lxml.etree as ETree
-import html
+import os, html, json, rdflib, lxml.etree as ETree
 import xml.etree.ElementTree as ET
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
-#from webproj.app.model.track import Track
 from ..model.artist import Artist
-from ..api.urls import getAlbumInfoURL, getAlbumInfoIDURL
+from ..model.tag import Tag
+from ..api.urls import getAlbumInfoURL, getAlbumInfoIDURL, getTrackInfoURL
 from ..db.BaseXClient import Session
+from s4api.graphdb_api import GraphDBApi
+from s4api.swagger import ApiClient
 
 class Album:
 
@@ -28,14 +28,248 @@ class Album:
 
         self.albumExists = True
 
-        if (self.checkDatabase()):
-            print('Fetching from database')
-            self.fetchInfoDatabase()
+        # if (self.checkDatabase()):
+        #     print('Fetching from database')
+        #     self.fetchInfoDatabase()
+        # else:
+        #     print('Fetching from API')
+        #     # self.fetchInfo()
+        #     # self.putInDatabase()
+        #     self.transformAlbum()
+
+        if self.checkGraphDB():
+            print('Fetching from GraphDB')
+            self.fetchInfoGraphDB()
         else:
             print('Fetching from API')
-            # self.fetchInfo()
-            # self.putInDatabase()
-            self.transformAlbum()
+            self.transformAlbumRDF()
+
+    def checkGraphDB(self):
+        endpoint = "http://localhost:7200"
+        repo_name = "xpand-music"
+
+        client = ApiClient(endpoint=endpoint)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT *
+                    WHERE{
+                        ?artist rdf:type cs:MusicArtist .
+                        ?artist foaf:name "%s" .
+                        ?album rdf:type cs:Album .
+                        ?album cs:MusicArtist ?artist .
+                        ?album foaf:name "%s" .
+                    }
+                """ % (self.artist, quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=repo_name)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            if (e['album']['value']):
+                return True
+            return False
+
+
+    def checkTrackGraphDB(self, trackName):
+        endpoint = "http://localhost:7200"
+        repo_name = "xpand-music"
+
+        client = ApiClient(endpoint=endpoint)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT *
+                    WHERE{
+                        ?artist rdf:type cs:MusicArtist .
+                        ?artist foaf:name "%s" .
+                        ?track rdf:type cs:Track .
+                        ?track cs:MusicArtist ?artist .
+                        ?track foaf:name "%s" .
+                    }
+                """ % (self.artist, trackName)
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=repo_name)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            if (e['track']['value']):
+                return True
+            return False
+
+    def transformAlbumRDF(self):
+        print("Transforming Album (RDF)...")
+
+        try:
+            url = urlopen(getAlbumInfoURL(quote(self.artist), quote(self.name)))
+        except HTTPError:
+            print('Album doesn\'t exist!')
+            self.artistExists = False
+        else:
+            currentPath = os.getcwd()
+
+            # Transformacao do artista
+            xmlParsed = ETree.parse(url)
+
+            albumXSLT = ETree.parse(open(currentPath + '/app/xml/transformAlbumRDF.xsl', 'r'))
+            transform = ETree.XSLT(albumXSLT)
+            finalAlbum = transform(xmlParsed)
+
+            finalAlbum = str.replace(str(finalAlbum), '<?xml version="1.0"?>', '')
+
+            g = rdflib.Graph()
+            result = g.parse(data=finalAlbum, format="application/rdf+xml")
+
+            endpoint = "http://localhost:7200"
+            repo_name = "xpand-music"
+
+            client = ApiClient(endpoint=endpoint)
+            accessor = GraphDBApi(client)
+
+            print("Inserting album into GraphDB...")
+
+            for s, p, o in g:
+                # verificar se o objeto é um URI
+                if (urlparse(o).scheme and urlparse(o).netloc):
+                    # URI
+                    query = """
+                                insert data {<%s> <%s> <%s>}
+                            """ % (s, p, o)
+                else:
+                    # String
+                    query = """
+                                insert data {<%s> <%s> '%s'}
+                            """ % (s, p, quote(o))
+
+                # Enviar a query via API do GraphDB
+                payload_query = {"update": query}
+                res = accessor.sparql_update(body=payload_query,
+                                             repo_name=repo_name)
+
+            self.fetchInfoGraphDB()
+
+    def fetchInfoGraphDB(self):
+        endpoint = "http://localhost:7200"
+        repo_name = "xpand-music"
+
+        client = ApiClient(endpoint=endpoint)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT ?imagem ?tagName ?biografia
+                    WHERE{
+                        ?album rdf:type cs:Album .
+                        ?album foaf:name "%s" .
+                        ?album foaf:Image ?imagem .
+                        ?album cs:Tag ?tag .
+                        ?album cs:biography ?biografia .
+                        ?tag foaf:name ?tagName .
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=repo_name)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            self.image = e['imagem']['value']
+            Tag(unquote(e['tagName']['value']), displayTop=False)
+            self.tags.append(unquote(e['tagName']['value']))
+            self.wikiTextShort = unquote(e['biografia']['value'])
+
+        # outra query para as tracks
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT ?trackname
+                    WHERE{
+                        ?album rdf:type cs:Album .
+                        ?album foaf:name "%s" .
+                        ?track cs:Album ?album .
+                        ?track foaf:name ?trackname .
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=repo_name)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            self.tracks.append(unquote(e['trackname']['value']))
+
+            # Inserir Track no GraphDB
+            self.transformTrackRDF(e['trackname']['value'])
+
+
+    def transformTrackRDF(self, trackName):
+        # Verificar se a musica ja existe no grafo
+        if self.checkTrackGraphDB(trackName):
+            return
+
+        print("Transforming Track ", unquote(trackName), "...")
+
+        try:
+            url = urlopen(getTrackInfoURL(trackName, quote(self.artist)))
+        except HTTPError:
+            print('Track doesn\'t exist!')
+        else:
+            currentPath = os.getcwd()
+
+            # Transformacao do artista
+            xmlParsed = ETree.parse(url)
+
+            trackXSLT = ETree.parse(open(currentPath + '/app/xml/transformTrackRDF.xsl', 'r'))
+            transform = ETree.XSLT(trackXSLT)
+            finalTrack = transform(xmlParsed)
+
+            finalTrack = str.replace(str(finalTrack), '<?xml version="1.0"?>', '')
+
+            g = rdflib.Graph()
+            result = g.parse(data=finalTrack, format="application/rdf+xml")
+
+            endpoint = "http://localhost:7200"
+            repo_name = "xpand-music"
+
+            client = ApiClient(endpoint=endpoint)
+            accessor = GraphDBApi(client)
+
+            print("Inserting track into GraphDB...")
+
+            for s, p, o in g:
+                # verificar se o objeto é um URI
+                if (urlparse(o).scheme and urlparse(o).netloc):
+                    # URI
+                    query = """
+                                insert data {<%s> <%s> <%s>}
+                            """ % (s, p, o)
+                else:
+                    # String
+                    query = """
+                                insert data {<%s> <%s> '%s'}
+                            """ % (s, p, quote(o))
+
+                # Enviar a query via API do GraphDB
+                payload_query = {"update": query}
+                res = accessor.sparql_update(body=payload_query,
+                                             repo_name=repo_name)
+
 
     def transformAlbum(self):
         print("Transforming Album...")
@@ -214,7 +448,6 @@ class Album:
             if session:
                 session.close()
 
-
     def checkDatabase(self):
         result = False
         session = Session('localhost', 1984, 'admin', 'admin')
@@ -315,7 +548,6 @@ class Album:
                                     tagText = tag.find('name').text
                                     self.tags.append(tagText)
 
-
     def changeComment(self, numComment, newText):
         session = Session('localhost', 1984, 'admin', 'admin')
 
@@ -338,7 +570,6 @@ class Album:
             if session:
                 session.close()
 
-
     def deleteComment(self, numComment):
         session = Session('localhost', 1984, 'admin', 'admin')
 
@@ -360,7 +591,6 @@ class Album:
         finally:
             if session:
                 session.close()
-
 
     def storeComment(self, user, text):
         session = Session('localhost', 1984, 'admin', 'admin')

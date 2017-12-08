@@ -129,7 +129,18 @@ def artist(request, artist):
         'form': SearchForm(),
         'commentForm': CommentForm(),
         'comments': artistObj.getComments(),
-        'url' : 'artist'
+        'url' : 'artist',
+        'country' : artistObj.getCountry(),
+        'countryCode': artistObj.getCountryCode(),
+        'members': artistObj.getMembers(),
+        'website': artistObj.getWebsite(),
+        'recorders': artistObj.getRecorders(),
+        'occupations': artistObj.getOccupation(),
+        'gender': artistObj.getGender(),
+        'genres': artistObj.getGenres(),
+        'yearFounded': artistObj.getYearFounded(),
+        'givenName': artistObj.getGivenName(),
+        'birthDate': artistObj.getBirthDate(),
     }
 
     return render(request, 'artist.html', tparams)
