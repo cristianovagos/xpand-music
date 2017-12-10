@@ -436,50 +436,43 @@ class Album:
 
 
     def fetchWikiData(self):
-        # Objetivo: obter ID do album na Wikidata via JSON
-        url = urlopen(
-            "https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles=" + quote(
-                self.name) + "&format=json")
+        # Objetivo: obter ID do artista na Wikidata via JSON
+        url = urlopen("https://www.wikidata.org/w/api.php?action=wbsearchentities&search=" + quote(
+            self.name) + "&language=en&format=json")
 
         # Obter o JSON
         data = json.loads(url.read().decode("utf-8"))
-        item = None
-        tmp = dict(data['query']['pages'])
-        for key, value in tmp.items():
-            # Percorrer o JSON para obter o wikibase_item que é o ID da Wikidata
-            try:
-                item = value['pageprops']['wikibase_item']
-            except Exception:
-                # Caso o artista a procurar não exista na Wikidata, ou erro na procura
-                item = None
 
-        # Verificar se temos ID
-        if not item:
-            print("Failed to fetch data from Wikidata. The page seems invalid.")
-            return
+        ids = []
+        for result in data['search']:
+            # Obter todos os IDs
+            ids.append(result['id'])
 
-        print("Trying to fetch data from Wikidata...")
-
-        # Criar cliente que se liga à Wikidata
         client = Client()
-
-        # Obter o item a partir da Wikidata
-        entity = client.get(item, load=True)
-
+        entity = None
         albumFound = False
 
-        # Saber se é album
-        instanceProperty = client.get('P31')
-        for list in entity.getlist(instanceProperty):
-            if str(list.label) == "album":
-                print("Album detected")
-                albumFound = True
+        if ids:
+            # Percorrer todos os IDs para sabermos quais deles são um album
+            for id in ids:
+                entity = client.get(id, load=True)
+
+                instanceProperty = client.get('P31')
+                try:
+                    instance = entity[instanceProperty].label
+                except Exception:
+                    instance = None
+
+                if str(instance) == 'album':
+                    print("Album detected")
+                    albumFound = True
+                    break
 
         if not albumFound:
             print("Album not found in Wikidata.")
             return
 
-        # Verificar se o artista
+        # Verificar se o artista corresponde
         performerProperty = client.get('P175')
         try:
             performer = str(entity[performerProperty].label)

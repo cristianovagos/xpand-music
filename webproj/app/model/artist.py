@@ -643,47 +643,45 @@ class Artist:
     # Retirar dados da Wikidata usando a biblioteca Wikidata
     def fetchWikiData(self):
         # Objetivo: obter ID do artista na Wikidata via JSON
-        url = urlopen(
-            "https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles=" + quote(
-                self.name) + "&format=json")
+        url = urlopen("https://www.wikidata.org/w/api.php?action=wbsearchentities&search=" + quote(
+            self.name) + "&language=en&format=json")
 
         # Obter o JSON
         data = json.loads(url.read().decode("utf-8"))
-        item = None
-        tmp = dict(data['query']['pages'])
-        for key, value in tmp.items():
-            # Percorrer o JSON para obter o wikibase_item que é o ID da Wikidata
-            try:
-                item = value['pageprops']['wikibase_item']
-            except Exception:
-                # Caso o artista a procurar não exista na Wikidata, ou erro na procura
-                item = None
 
-        # Verificar se temos ID
-        if not item:
-            print("Failed to fetch data from Wikidata. The page seems invalid.")
-            return
+        ids = []
+        for result in data['search']:
+            # Obter todos os IDs
+            ids.append(result['id'])
 
-        print("Trying to fetch data from Wikidata...")
-
-        # Criar cliente que se liga à Wikidata
         client = Client()
+        entity = None
+        human = False
 
-        # Obter o item a partir da Wikidata
-        entity = client.get(item, load=True)
+        if ids:
+            # Percorrer todos os IDs para sabermos quais deles são relacionados com música
+            # banda / humano
+            for id in ids:
+                entity = client.get(id, load=True)
 
-        # Saber se artista é banda ou humano
-        instanceProperty = client.get('P31')
-        for list in entity.getlist(instanceProperty):
-            if str(list.label) == "band":
-                print("Band detected")
-                self.band = True
-                break
-            elif str(list.label) != "human":
-                return
-        
-        if not self.band:
-            print("Human detected")
+                instanceProperty = client.get('P31')
+                try:
+                    instance = entity[instanceProperty].label
+                except Exception:
+                    instance = None
+
+                if str(instance) == 'band':
+                    print("Band detected")
+                    self.band = True
+                    break
+                elif str(instance) == 'human':
+                    print("Human detected")
+                    human = True
+                    break
+
+        if not (human or self.band):
+            print("Could not fetch data from Wikidata.")
+            return
 
         # Saber ocupação
         occupation = []
