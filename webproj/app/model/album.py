@@ -465,22 +465,20 @@ class Album:
 
                 if str(instance) == 'album':
                     print("Album detected")
-                    albumFound = True
-                    break
+
+                    # Verificar se o artista corresponde
+                    performerProperty = client.get('P175')
+                    try:
+                        performer = str(entity[performerProperty].label)
+                    except Exception:
+                        performer = None
+
+                    if performer in self.artist:
+                        albumFound = True
+                        break
 
         if not albumFound:
             print("Album not found in Wikidata.")
-            return
-
-        # Verificar se o artista corresponde
-        performerProperty = client.get('P175')
-        try:
-            performer = str(entity[performerProperty].label)
-        except Exception:
-            performer = None
-
-        if performer not in self.artist:
-            print("Could not get data from Wikidata: performer not the same as this artist!")
             return
 
         print("Fetching data from Wikidata...")

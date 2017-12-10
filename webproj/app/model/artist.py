@@ -656,7 +656,7 @@ class Artist:
 
         client = Client()
         entity = None
-        human = False
+        musician = False
 
         if ids:
             # Percorrer todos os IDs para sabermos quais deles são relacionados com música
@@ -676,27 +676,26 @@ class Artist:
                     break
                 elif str(instance) == 'human':
                     print("Human detected")
-                    human = True
-                    break
 
-        if not (human or self.band):
+                    # Vamos saber se esta pessoa tem algo a ver com musica
+
+                    # Saber ocupação
+                    occupation = []
+                    occupationProperty = client.get('P106')
+                    try:
+                        for occup in entity.getlist(occupationProperty):
+                            occupation.append(str(occup.label))
+                    except Exception:
+                        occupation = None
+
+                    if 'singer' in occupation or 'singer-songwriter' in occupation \
+                        or 'composer' in occupation or 'musician' in occupation \
+                        or 'songwriter' in occupation or 'rapper' in occupation:
+                        musician = True
+                        break
+
+        if not (musician or self.band):
             print("Could not fetch data from Wikidata.")
-            return
-
-        # Saber ocupação
-        occupation = []
-        occupationProperty = client.get('P106')
-        try:
-            for occup in entity.getlist(occupationProperty):
-                occupation.append(str(occup.label))
-        except Exception:
-            occupation = None
-
-        # Se a sua ocupação não for a música ou se não se tratar de uma banda, sair
-        if not('singer' in occupation or 'singer-songwriter' in occupation \
-                or 'composer' in occupation or 'musician' in occupation \
-                or 'songwriter' in occupation or 'rapper' in occupation or self.band):
-            print("Data not fetched from Wikidata: page ID not related to music!")
             return
 
         print("Fetching data from Wikidata...")
