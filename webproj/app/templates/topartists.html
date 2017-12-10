@@ -14,60 +14,80 @@
             <div class="row">
                 <h1 class="text-center">Top Artists</h1>
             </div>
-            <div class="row" style="padding-top: 20px;">
-                <div class="col-md-1"></div>
-                {% for artist in topArtists %}
-                    {% if forloop.counter0|divisibleby:5 %}
-                        <div class="row" style="padding-top: 20px;">
-                            <div class="col-md-1"></div>
-                    {% endif %}
-                            <div class="col-sm-2 text-center">
-                                <a href="{% url 'artist' artist=artist.0 %}">
-                                    <img class="img-rounded" height="150" width="150" src="{{ artist.1 }}">
-                                </a>
+            {% if topArtists %}
+                <div class="row" style="padding-top: 20px;">
+                    <div class="col-md-1"></div>
+                    {% for artist in topArtists %}
+                        {% if forloop.counter0|divisibleby:5 %}
+                            <div class="row" style="padding-top: 20px;">
+                                <div class="col-md-1"></div>
+                        {% endif %}
+                                {% if topArtists|length == 1 %}
+                                    <div class="col-sm-10 text-center">
+                                {% elif topArtists|length == 2 %}
+                                    <div class="col-sm-5 text-center">
+                                {% else %}
+                                    <div class="col-sm-2 text-center">
+                                {% endif %}
+                                        <a href="{% url 'artist' artist=artist.0 %}">
+                                            <img class="img-rounded" height="150" width="150" src="{{ artist.1 }}">
+                                        </a>
+                                        <br><br>
+                                        <h4 class="media-heading text-center">
+                                            <a href="{% url 'artist' artist=artist.0 %}" style="color:black">{{ artist.0 }}</a>
+                                        </h4>
+                                    </div>
+                        {% if forloop.counter|divisibleby:5 %}
                                 <br><br>
-                                <h4 class="media-heading text-center">
-                                    <a href="{% url 'artist' artist=artist.0 %}" style="color:black">{{ artist.0 }}</a>
-                                </h4>
                             </div>
-                    {% if forloop.counter|divisibleby:5 %}
-                            <br><br>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                <div class="col-md-1"></div>
-            </div>
-        </div>
-        <nav class="text-center" aria-label="Page navigation" style="padding-top: 30px;">
-          <ul class="pagination">
-              {% if page > 1 %}
-                  <li>
-                    <a href="{% url 'topArtistsPage' page=page|add:"-1" %}" aria-label="Previous">
-              {% elif page == 1 %}
-                  <li class="disabled">
-                    <a href="{% url 'topArtists' %}" aria-label="Previous">
-              {% else %}
-                  <li>
-                    <a href="{% url 'topArtists' %}" aria-label="Previous">
-              {% endif %}
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-            </li>
-            {% if page == 1 %}
-                <li class="active"><a href="{% url 'topArtists' %}">{{ page }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="col-md-1"></div>
+                </div>
+            {% elif not topArtists and page > 1 %}
+                <div class="row">
+                    <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">Sorry, no more artists found. Try the previous page.</h3>
+                </div>
             {% else %}
-                <li class="active"><a href="{% url 'topArtistsPage' page=page %}">{{ page }}</a></li>
+                <div class="row">
+                    <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">Sorry, no artists found. How about search for it?</h3>
+                </div>
             {% endif %}
-            <li><a href="{% url 'topArtistsPage' page=page|add:1 %}">{{ page|add:1 }}</a></li>
-            <li><a href="{% url 'topArtistsPage' page=page|add:2 %}">{{ page|add:2 }}</a></li>
-            <li><a href="{% url 'topArtistsPage' page=page|add:3 %}">{{ page|add:3 }}</a></li>
-            <li><a href="{% url 'topArtistsPage' page=page|add:4 %}">{{ page|add:4 }}</a></li>
-            <li>
-              <a href="{% url 'topArtistsPage' page=page|add:1 %}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+        </div>
+        {% if topArtists %}
+            <nav class="text-center" aria-label="Page navigation" style="padding-top: 30px;">
+                <ul class="pagination">
+                    {% if page > 1 %}
+                    <li>
+                        <a href="{% url 'topArtistsPage' page=page|add:"-1" %}" aria-label="Previous">
+                    {% elif page == 1 %}
+                    <li class="disabled">
+                        <a href="{% url 'topArtists' %}" aria-label="Previous">
+                    {% else %}
+                    <li>
+                        <a href="{% url 'topArtists' %}" aria-label="Previous">
+                    {% endif %}
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% if page == 1 %}
+                        <li class="active"><a href="{% url 'topArtists' %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="active"><a href="{% url 'topArtistsPage' page=page %}">{{ page }}</a></li>
+                    {% endif %}
+                    {% if topArtists %}
+                        <li><a href="{% url 'topArtistsPage' page=page|add:1 %}">{{ page|add:1 }}</a></li>
+                {#                <li><a href="{% url 'topArtistsPage' page=page|add:2 %}">{{ page|add:2 }}</a></li>#}
+                {#                <li><a href="{% url 'topArtistsPage' page=page|add:3 %}">{{ page|add:3 }}</a></li>#}
+                {#                <li><a href="{% url 'topArtistsPage' page=page|add:4 %}">{{ page|add:4 }}</a></li>#}
+                        <li>
+                            <a href="{% url 'topArtistsPage' page=page|add:1 %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     </section>
 {% endblock %}

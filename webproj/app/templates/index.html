@@ -43,7 +43,11 @@
 {% block content %}
     <div class="container">
         <div class="row">
+            {% if not topArtists and not topTracks %}
+            <div class="col-md-12 col-lg-offset-1">
+            {% else %}
             <div class="col-md-8">
+            {% endif %}
                 <h2>
                     <span class="glyphicon glyphicon-bullhorn"></span>
                     <a href="{% url 'news' %}">
@@ -56,7 +60,6 @@
                         {% if forloop.counter|divisibleby:"2" %}
                             <div class="row" style="padding-right: 50px;">
                         {% endif %}
-
                         <div class="col-sm-5">
                             <div class="card">
                                 <img class="img-rounded" src="{{ noticia.image }}" height="250" width="250">
@@ -82,59 +85,71 @@
                 </div>
             </div>
             <br>
-            <div class="col-md-4 panel panel-default">
-                <div class="nav panel-tabs">
-                    <ul class="panel-heading nav nav-pills nav-justified green">
-                        <li role="presentation" class="active" style="font-weight: bold">
-                            <a href="#artists" data-toggle="tab">Top Artists</a>
-                        </li>
-                        <li role="presentation" style="font-weight: bold"><a href="#albums" data-toggle="tab">Top Tracks</a></li>
-                    </ul>
-                </div>
-                <div class="panel-body">
-                    <div class="tab-content clearfix">
-                        <!-- TOP ARTISTAS -->
-                        <div class="tab-pane panel-body active" id="artists">
-                            <div class="container" style="padding-left: 5px; padding-right: 5px;">
-                                {% for artista in topArtists %}
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <img class="img-circle" height="60" width="60" src="{{ artista.1 }}">
-                                        </div>
-                                        <div class="col-sm-8">
+            {% if topArtists or topTracks %}
+                <div class="col-md-4 panel panel-default">
+                    <div class="nav panel-tabs">
+                        <ul class="panel-heading nav nav-pills nav-justified green">
+                            {% if topArtists %}
+                                <li role="presentation" class="active" style="font-weight: bold">
+                                    <a href="#artists" data-toggle="tab">Top Artists</a>
+                                </li>
+                            {% endif %}
+                            {% if topTracks %}
+                                <li role="presentation" style="font-weight: bold">
+                                    <a href="#albums" data-toggle="tab">Top Tracks</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-content clearfix">
+                            <!-- TOP ARTISTAS -->
+                            {% if topArtists %}
+                                <div class="tab-pane panel-body active" id="artists">
+                                    <div class="container" style="padding-left: 5px; padding-right: 5px;">
+                                        {% for artista in topArtists %}
                                             <br>
-                                            <a href="{% url 'artist' artist=artista.0 %}" style="color: black">
-                                                <h4 class="media-heading">{{ artista.0 }}</h4>
-                                            </a>
-                                        </div>
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <img class="img-circle" height="60" width="60" src="{{ artista.1 }}">
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <br>
+                                                    <a href="{% url 'artist' artist=artista.0 %}" style="color: black">
+                                                        <h4 class="media-heading">{{ artista.0 }}</h4>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <!-- TOP TRACKS -->
-                        <div class="tab-pane" id="albums">
-                            <div class="container">
-                                {% for track in topTracks %}
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <img class="img-rounded" height="60" width="60" src="{{ track.2 }}">
-                                        </div>
-                                        <div class="col-sm-8">
-                                            <h3 class="media-heading">{{ track.1 }}</h3>
-                                            by
-                                            <a href="{% url 'artist' artist=track.0 %}" style="font-weight: bold">
-                                                {{ track.0 }}
-                                            </a>
-                                        </div>
+                                </div>
+                            {% endif %}
+                            <!-- TOP TRACKS -->
+                            {% if topTracks %}
+                                <div class="tab-pane" id="albums">
+                                    <div class="container">
+                                        {% for track in topTracks %}
+                                            <br>
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <img class="img-rounded" height="60" width="60" src="{{ track.2 }}">
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <h3 class="media-heading">{{ track.1 }}</h3>
+                                                    by
+                                                    <a href="{% url 'artist' artist=track.0 %}" style="font-weight: bold">
+                                                        {{ track.0 }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
-                            </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

@@ -7,25 +7,43 @@ from ..model.artist import Artist
 from ..model.tag import Tag
 from ..api.urls import getAlbumInfoURL, getAlbumInfoIDURL, getTrackInfoURL
 from ..db.BaseXClient import Session
+from ..utils.dates import calculateAge
+from datetime import datetime
 from s4api.graphdb_api import GraphDBApi
 from s4api.swagger import ApiClient
+from collections import Counter
+from wikidata.client import Client
+
+# dados de ligação ao GraphDB
+ENDPOINT = "http://localhost:7200"
+REPO_NAME = "xpand-music"
 
 class Album:
 
-    def __init__(self, name, artist, mbid=None):
+    def __init__(self, name, artist, mbid=None, max_items=5):
         self.name = name
         self.artist = artist
         self.mbid = mbid
+        self.max_items = max_items
         self.image = None
         self.tracks = []
         self.tags = []
         self.comments = []
         self.wikiTextShort = None
         self.wikiTextFull = None
+        self.similarAlbums = []
+        self.recorders = []
+        self.genres = []
+        self.producer = None
+        self.previousAlbum = None
+        self.nextAlbum = None
+        self.datePublished = None
+        self.age = None
 
         self.noAlbumImage = self.noTrackImage = "https://www.shareicon.net/data/2015/07/09/66681_music_512x512.png"
         self.noWikiText = "Sorry, no wiki available for this album."
 
+        self.wikiData = False
         self.albumExists = True
 
         # if (self.checkDatabase()):
@@ -38,17 +56,14 @@ class Album:
         #     self.transformAlbum()
 
         if self.checkGraphDB():
-            print('Fetching from GraphDB')
+            print('Fetching ', self.name,' from GraphDB')
             self.fetchInfoGraphDB()
         else:
-            print('Fetching from API')
+            print('Fetching ', self.name,' from API')
             self.transformAlbumRDF()
 
     def checkGraphDB(self):
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -63,11 +78,11 @@ class Album:
                         ?album cs:MusicArtist ?artist .
                         ?album foaf:name "%s" .
                     }
-                """ % (self.artist, quote(self.name))
+                """ % (quote(self.artist), quote(self.name))
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -75,12 +90,34 @@ class Album:
                 return True
             return False
 
+    def getAlbumURI(self, albumName):
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT *
+                    WHERE{
+                        ?artist rdf:type cs:MusicArtist .
+                        ?artist foaf:name "%s" .
+                        ?album rdf:type cs:Album .
+                        ?album cs:MusicArtist ?artist .
+                        ?album foaf:name "%s" .
+                    }
+                """ % (quote(self.artist), quote(albumName))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            return e['album']['value']
 
     def checkTrackGraphDB(self, trackName):
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -94,12 +131,13 @@ class Album:
                         ?track rdf:type cs:Track .
                         ?track cs:MusicArtist ?artist .
                         ?track foaf:name "%s" .
+                        ?track cs:playCount ?trackCount .
                     }
-                """ % (self.artist, trackName)
+                """ % (quote(self.artist), trackName)
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -128,12 +166,9 @@ class Album:
             finalAlbum = str.replace(str(finalAlbum), '<?xml version="1.0"?>', '')
 
             g = rdflib.Graph()
-            result = g.parse(data=finalAlbum, format="application/rdf+xml")
+            g.parse(data=finalAlbum, format="application/rdf+xml")
 
-            endpoint = "http://localhost:7200"
-            repo_name = "xpand-music"
-
-            client = ApiClient(endpoint=endpoint)
+            client = ApiClient(endpoint=ENDPOINT)
             accessor = GraphDBApi(client)
 
             print("Inserting album into GraphDB...")
@@ -154,15 +189,19 @@ class Album:
                 # Enviar a query via API do GraphDB
                 payload_query = {"update": query}
                 res = accessor.sparql_update(body=payload_query,
-                                             repo_name=repo_name)
+                                             repo_name=REPO_NAME)
 
+            # Retirar dados da WikiData
+            self.fetchWikiData()
+
+            # Verificar inferencias
+            self.checkInferences()
+
+            # Retirar dados do GraphDB e preencher atributos da classe
             self.fetchInfoGraphDB()
 
     def fetchInfoGraphDB(self):
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -182,7 +221,7 @@ class Album:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -208,7 +247,7 @@ class Album:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -216,6 +255,345 @@ class Album:
 
             # Inserir Track no GraphDB
             self.transformTrackRDF(e['trackname']['value'])
+
+
+        # Similar Albums
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT ?similarName ?similarImage ?similarArtist
+                    WHERE{
+                        ?album rdf:type cs:Album .
+                        ?album foaf:name "%s" .
+                        ?similar cs:similarAlbum ?album .
+                        ?similar foaf:name ?similarName .
+                        ?similar foaf:Image ?similarImage .
+                        ?similar cs:MusicArtist ?artist .
+                        ?artist foaf:name ?similarArtist .
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            if unquote(e['similarArtist']['value']) == self.artist:
+                break
+
+            similarInfo = []
+
+            similarInfo.append(unquote(e['similarName']['value']))
+            similarInfo.append(e['similarImage']['value'])
+            similarInfo.append(unquote(e['similarArtist']['value']))
+
+            self.similarAlbums.append(similarInfo)
+
+        self.similarAlbums = self.similarAlbums[:self.max_items]
+
+        # WikiData Info
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT *
+                    WHERE{
+                        ?album rdf:type cs:Album .
+                        ?album foaf:name "%s" .
+                        OPTIONAL {
+                            ?album cs:recorder ?recorder .
+                        }
+                        OPTIONAL {
+                            ?album cs:genre ?genre .
+                        }
+                        OPTIONAL {
+                            ?album cs:datePublished ?datePublished .
+                        }
+                        OPTIONAL {
+                            ?album cs:producer ?producer .
+                        }
+                        OPTIONAL {
+                            ?album cs:previousAlbum ?previousAlbum .
+                        }
+                        OPTIONAL {
+                            ?album cs:nextAlbum ?nextAlbum .
+                        }
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            try:
+                self.recorders.append(unquote(e['recorder']['value']))
+            except Exception:
+                self.recorders = None
+
+            try:
+                self.genres.append(unquote(e['genre']['value']).capitalize())
+            except Exception:
+                self.genres = None
+
+            try:
+                self.producer = unquote(e['producer']['value'])
+            except Exception:
+                self.producer = None
+
+            try:
+                self.previousAlbum = unquote(e['previousAlbum']['value'])
+            except Exception:
+                self.previousAlbum = None
+
+            try:
+                self.nextAlbum = unquote(e['nextAlbum']['value'])
+            except Exception:
+                self.nextAlbum = None
+
+            try:
+                tmpDate = datetime.strptime(unquote(e['datePublished']['value']), '%Y-%m-%d')
+                self.datePublished = tmpDate.strftime('%d/%m/%Y')
+                self.age = calculateAge(tmpDate)
+            except Exception:
+                self.datePublished = None
+                self.age = None
+
+        if self.recorders:
+            self.recorders = list(set(self.recorders))
+        if self.genres:
+            self.genres = list(set(self.genres))
+
+
+    def checkInferences(self):
+        # Inferencia Albuns Semelhantes
+        # Consideram-se semelhantes albuns que tenham pelo menos 3 tags em comum
+
+        # ligar ao GraphDB
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        # obter albuns com as mesmas tags que este album
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT ?album1 ?album2 ?album2Name
+                    WHERE{
+                        ?album1 rdf:type cs:Album .
+                        ?album1 foaf:name "%s" .
+                        ?album1 cs:Tag ?tag .
+                        ?album2 rdf:type cs:Album .
+                        ?album2 cs:Tag ?tag .
+                        ?album2 foaf:name ?album2Name
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        albumsWithSameTags = []
+
+        for e in res['results']['bindings']:
+            # obter uri do album atual
+            uriAlbum = e['album1']['value']
+
+            # se album diferente do atual, guardar
+            if(e['album2Name']['value'] != quote(self.name)):
+                albumsWithSameTags.append(e['album2']['value'])
+
+        # contar numero de ocorrencias de cada album
+        auxCount = Counter(albumsWithSameTags)
+
+        # para cada album se o numero de ocorrencia
+        # de tags for maior ou igual a 3 é album semelhante
+        for album in auxCount:
+            if auxCount.get(album) >= 3:
+                # album1 é semelhante ao 2
+                # album2 é semelhante ao 1
+                query = """
+                            PREFIX cs: <http://www.xpand.com/rdf/>
+                            INSERT DATA
+                            { 
+                                <%s> cs:similarAlbum <%s> . 
+                                <%s> cs:similarAlbum <%s> .
+                            }
+                        """ % (album, uriAlbum, uriAlbum, album)
+
+                # Enviar a query via API do GraphDB
+                payload_query = {"update": query}
+                res = accessor.sparql_update(body=payload_query,
+                                             repo_name=REPO_NAME)
+
+        # Se não houver dados da wikiData não vale a pena continuar
+        if not self.wikiData:
+            return
+
+
+    def fetchWikiData(self):
+        # Objetivo: obter ID do album na Wikidata via JSON
+        url = urlopen(
+            "https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles=" + quote(
+                self.name) + "&format=json")
+
+        # Obter o JSON
+        data = json.loads(url.read().decode("utf-8"))
+        item = None
+        tmp = dict(data['query']['pages'])
+        for key, value in tmp.items():
+            # Percorrer o JSON para obter o wikibase_item que é o ID da Wikidata
+            try:
+                item = value['pageprops']['wikibase_item']
+            except Exception:
+                # Caso o artista a procurar não exista na Wikidata, ou erro na procura
+                item = None
+
+        # Verificar se temos ID
+        if not item:
+            print("Failed to fetch data from Wikidata. The page seems invalid.")
+            return
+
+        print("Trying to fetch data from Wikidata...")
+
+        # Criar cliente que se liga à Wikidata
+        client = Client()
+
+        # Obter o item a partir da Wikidata
+        entity = client.get(item, load=True)
+
+        albumFound = False
+
+        # Saber se é album
+        instanceProperty = client.get('P31')
+        for list in entity.getlist(instanceProperty):
+            if str(list.label) == "album":
+                print("Album detected")
+                albumFound = True
+
+        if not albumFound:
+            print("Album not found in Wikidata.")
+            return
+
+        # Verificar se o artista
+        performerProperty = client.get('P175')
+        try:
+            performer = str(entity[performerProperty].label)
+        except Exception:
+            performer = None
+
+        if performer not in self.artist:
+            print("Could not get data from Wikidata: performer not the same as this artist!")
+            return
+
+        print("Fetching data from Wikidata...")
+
+        # Obter editora(s) do album
+        recorders = []
+        recordProperty = client.get('P264')
+        try:
+            for records in entity.getlist(recordProperty):
+                recorders.append(str(records.label))
+        except Exception:
+            recorders = None
+
+        # Obter estilo(s) musical do album
+        genres = []
+        genreProperty = client.get('P136')
+        try:
+            for genre in entity.getlist(genreProperty):
+                genres.append(str(genre.label))
+        except Exception:
+            genres = None
+
+        # Obter data de lançamento do álbum
+        publishDateProperty = client.get('P577')
+        try:
+            publishDate = str(entity[publishDateProperty])
+        except Exception:
+            publishDate = None
+
+        # Obter produtor do álbum
+        producerProperty = client.get('P162')
+        try:
+            producer = str(entity[producerProperty].label)
+        except Exception:
+            producer = None
+
+        # Obter álbum anterior
+        previousAlbumProperty = client.get('P155')
+        try:
+            previousAlbum = str(entity[previousAlbumProperty].label)
+        except Exception:
+            previousAlbum = None
+
+        # Obter próximo álbum
+        nextAlbumProperty = client.get('P156')
+        try:
+            nextAlbum = str(entity[nextAlbumProperty].label)
+        except Exception:
+            nextAlbum = None
+
+        # ligar ao GraphDB
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        albumURI = self.getAlbumURI(self.name)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    INSERT DATA {
+                        <%s> cs:WikiData true .
+                """ % (albumURI)
+
+        if (recorders):
+            for i in recorders:
+                query += """
+                                <%s> cs:recorder "%s" .
+                        """ % (albumURI, quote(i))
+
+        if (genres):
+            for i in genres:
+                query += """
+                                <%s> cs:genre "%s" .
+                        """ % (albumURI, quote(i))
+
+        if (publishDate):
+            query += """
+                                <%s> cs:datePublished "%s" .
+                        """ % (albumURI, quote(publishDate))
+            
+        if (producer):
+            query += """
+                                <%s> cs:producer "%s" .
+                        """ % (albumURI, quote(producer))
+        
+        if (previousAlbum):
+            query += """
+                                <%s> cs:previousAlbum "%s" .
+                        """ % (albumURI, quote(previousAlbum))
+            
+        if (nextAlbum):
+            query += """
+                                <%s> cs:nextAlbum "%s" .
+                        """ % (albumURI, quote(nextAlbum))
+
+        query += """
+                            }
+                         """
+
+        # executar query via API do GraphDB
+        payload_query = {"update": query}
+        res = accessor.sparql_update(body=payload_query,
+                                     repo_name=REPO_NAME)
+
+        self.wikiData = True
 
 
     def transformTrackRDF(self, trackName):
@@ -227,6 +605,7 @@ class Album:
 
         try:
             url = urlopen(getTrackInfoURL(trackName, quote(self.artist)))
+            print(getTrackInfoURL(trackName, quote(self.artist)))
         except HTTPError:
             print('Track doesn\'t exist!')
         else:
@@ -242,12 +621,9 @@ class Album:
             finalTrack = str.replace(str(finalTrack), '<?xml version="1.0"?>', '')
 
             g = rdflib.Graph()
-            result = g.parse(data=finalTrack, format="application/rdf+xml")
+            g.parse(data=finalTrack, format="application/rdf+xml")
 
-            endpoint = "http://localhost:7200"
-            repo_name = "xpand-music"
-
-            client = ApiClient(endpoint=endpoint)
+            client = ApiClient(endpoint=ENDPOINT)
             accessor = GraphDBApi(client)
 
             print("Inserting track into GraphDB...")
@@ -268,11 +644,11 @@ class Album:
                 # Enviar a query via API do GraphDB
                 payload_query = {"update": query}
                 res = accessor.sparql_update(body=payload_query,
-                                             repo_name=repo_name)
+                                             repo_name=REPO_NAME)
 
 
     def transformAlbum(self):
-        print("Transforming Album...")
+        print("Transforming Album ", self.name, "...")
         try:
             url = urlopen(getAlbumInfoURL(quote(self.artist), quote(self.name)))
         except HTTPError:
@@ -661,6 +1037,30 @@ class Album:
 
     def getWikiFull(self):
         return self.wikiTextFull
+
+    def getSimilarAlbums(self):
+        return self.similarAlbums
+
+    def getRecorders(self):
+        return self.recorders
+
+    def getGenres(self):
+        return self.genres
+
+    def getProducer(self):
+        return self.producer
+
+    def getPreviousAlbum(self):
+        return self.previousAlbum
+
+    def getNextAlbum(self):
+        return self.nextAlbum
+
+    def getDatePublished(self):
+        return self.datePublished
+
+    def getAge(self):
+        return self.age
 
     def __str__(self):
         string = 'Album: ' + self.name

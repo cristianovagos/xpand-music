@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from urllib.request import urlopen
+from urllib.request import quote
 from .model.artist import Artist
 from .model.album import Album
 from .model.tag import Tag
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
-from .api.artists.artists import getTopArtists
+from .api.artists.artists import getTopArtists, getTopArtistsGraphDB, getTopArtistsCountriesGraphDB
 from .api.searchs.search import searchArtist, searchAlbum
-from .api.tracks.tracks import getTopTracks
+from .api.tracks.tracks import getTopTracks, getTopTracksGraphDB
 from .api.news.news import *
 from .forms import SearchForm, CommentForm
-from .api.tags.tags import *
+from .api.tags.tags import getTagTopArtists, getTagTopArtistsGraphDB, getTopTagsGraphDB
 from .api.albums.albums import *
+from .utils.countries import getCountriesGraphDB
 
 
 # Create your views here.
@@ -24,8 +25,8 @@ def home(request):
 
     tparams = {
         'title':'xPand - Your music hub.',
-        'topArtists' : getTopArtists(),
-        'topTracks': getTopTracks(),
+        'topArtists' : getTopArtistsGraphDB(),
+        'topTracks': getTopTracksGraphDB(),
         'news': getAllNews(6),
         'form': SearchForm()
     }
@@ -36,6 +37,7 @@ def album(request, album, artist):
 
     artistObj = Artist(str(artist))
     albumObj = Album(str(album), str(artist))
+    artistObj.fetchInfoGraphDB()
 
     if request.method == 'POST':
         if request.POST['form-type'] == 'comment-form':
@@ -69,7 +71,15 @@ def album(request, album, artist):
         'commentForm': CommentForm(),
         'comments': albumObj.getComments(),
         'url' : 'album',
-        'topAlbums' : artistObj.getTopAlbums()
+        'topAlbums' : artistObj.getTopAlbums(),
+        'datePublished': albumObj.getDatePublished(),
+        'age': albumObj.getAge(),
+        'genres': albumObj.getGenres(),
+        'recorders' : albumObj.getRecorders(),
+        'producer': albumObj.getProducer(),
+        'previousAlbum': albumObj.getPreviousAlbum(),
+        'nextAlbum': albumObj.getNextAlbum(),
+        'similarAlbums': albumObj.getSimilarAlbums(),
     }
     return render(request, 'album.html', tparams)
 
@@ -141,6 +151,8 @@ def artist(request, artist):
         'yearFounded': artistObj.getYearFounded(),
         'givenName': artistObj.getGivenName(),
         'birthDate': artistObj.getBirthDate(),
+        'age' : artistObj.getAge(),
+        'bands' : artistObj.getBands(),
     }
 
     return render(request, 'artist.html', tparams)
@@ -187,9 +199,11 @@ def topArtistsByTag(request):
     assert isinstance(request, HttpRequest)
 
     artists = []
-    tags = topTags()
+    # tags = topTags()
+    tags = getTopTagsGraphDB(num=10)
     for tag in tags:
-        artists.append(getTagTopArtists(tag))
+        # artists.append(getTagTopArtists(tag))
+        artists.append(getTagTopArtistsGraphDB(tag))
 
     tparams = {
         'title'      : 'xPand | Top Tags',
@@ -199,16 +213,34 @@ def topArtistsByTag(request):
     }
     return render(request, 'toptags.html', tparams)
 
+def topArtistsByCountry(request):
+    assert isinstance(request, HttpRequest)
+
+    artists = []
+    countries = getCountriesGraphDB(num=10)
+    for country in countries:
+        artists.append(getTopArtistsCountriesGraphDB(str(country[0])))
+
+    tparams = {
+        'title'      : 'xPand | Top Countries',
+        'topArtists' : artists,
+        'countries'  : countries,
+        'form'       : SearchForm()
+    }
+
+    return render(request, 'topcountries.html', tparams)
 
 def topArtists(request):
     assert isinstance(request, HttpRequest)
 
     tparams = {
         'title': 'xPand | Top Artists',
-        'topArtists': getTopArtists(num=50),
+        'topArtists': getTopArtistsGraphDB(num=50),
+        # 'topArtists': getTopArtists(num=50),
         'form': SearchForm(),
         'page': 1
     }
+
     return render(request, 'topartists.html', tparams)
 
 def topArtistsPage(request, page):
@@ -216,10 +248,12 @@ def topArtistsPage(request, page):
 
     tparams = {
         'title': 'xPand | Top Artists',
-        'topArtists': getTopArtists(num=50, page=int(page)),
+        'topArtists': getTopArtistsGraphDB(num=50, page=int(page)),
+        # 'topArtists': getTopArtists(num=50, page=int(page)),
         'form': SearchForm(),
         'page': int(page)
     }
+
     return render(request, 'topartists.html', tparams)
 
 def topTracks(request):
@@ -227,10 +261,12 @@ def topTracks(request):
 
     tparams = {
         'title': 'xPand | Top Tracks',
-        'topTracks': getTopTracks(num=50),
+        'topTracks': getTopTracksGraphDB(num=50),
+        # 'topTracks': getTopTracks(num=50),
         'form': SearchForm(),
         'page': 1
     }
+
     return render(request, 'toptracks.html', tparams)
 
 def topTracksPage(request, page):
@@ -238,8 +274,10 @@ def topTracksPage(request, page):
 
     tparams = {
         'title': 'xPand | Top Tracks',
-        'topTracks': getTopTracks(num=50, page=int(page)),
+        'topTracks': getTopTracksGraphDB(num=50, page=int(page)),
+        # 'topTracks': getTopTracks(num=50, page=int(page)),
         'form': SearchForm(),
         'page': int(page)
     }
+
     return render(request, 'toptracks.html', tparams)

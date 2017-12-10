@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <section about="http://www.xpand.com/album/{{ artist }}/{{ album }}">
-        <div class="container" style="padding-top: 40px">
+    <section>
+        <div class="container" style="padding-top: 40px" about="http://www.xpand.com/album/{{ artist }}/{{ album }}">
             <div class="row">
                 <ol class="breadcrumb">
                     <li><a href="{% url 'artist' artist=artist %}" property="cs:MusicArtist">{{ artist }}</a></li>
@@ -16,28 +16,76 @@
                 </div>
                 <div class="col-md-7">
                     <h1 class="my-4"><span property="foaf:name">{{ album }}</span><br>
-                        <small>by <a href="{% url 'artist' artist=artist %}" style="font-weight: bold" property="cs:MusicArtist">{{ artist }}</a></small>
+                        <small>
+                            by
+                            <a href="{% url 'artist' artist=artist %}" style="font-weight: bold" about="http://www.xpand.com/artist/{{ artist }}" property="foaf:name">
+                                {{ artist }}
+                            </a>
+                        </small>
                     </h1>
                     {% if tags|length > 1 %}
                         <br>
                         <span class="glyphicon glyphicon-tags"></span>&nbsp;
                         {% for tag in tags %}
                             <a href="{% url 'tag' tag=tag %}">
-                                <span class="label label-info" style="background-color: #4cae4c" property="cs:Tag">{{ tag }}</span>
+                                <span class="label label-info" style="background-color: #4cae4c" about="http://www.xpand.com/tags/{{ tag }}" property="foaf:name">
+                                    {{ tag }}
+                                </span>
                             </a>
+                            {% if not forloop.last %}
+                                &nbsp;
+                            {% endif %}
                         {% endfor %}
                     {% endif %}
                     <br><br>
-                    <p><span property="cs:biography">{{ wiki }}</span></p>
+                    <p><span property="cs:biography" class="text-justify">{{ wiki }}</span></p>
+                    {% if datePublished and age %}
+                        <p><b>Published: </b><span property="cs:datePublished">{{ datePublished }}</span> ({{ age }} years ago)</p>
+                    {% endif %}
+                    {% if genres %}
+                        <p>
+                            <b>Genres:</b>
+                            {% for genre in genres %}
+                                <a href="{% url 'tag' tag=genre %}" property="cs:genre">{{ genre }}</a>
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if recorders %}
+                        <p>
+                            <b>Record Label:</b>
+                            {% for recorder in recorders %}
+                                <span property="cs:recorder">
+                                    {{ recorder }}
+                                </span>
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if producer %}
+                        <p><b>Producer: </b><span property="cs:producer">{{ producer }}</span></p>
+                    {% endif %}
                 </div>
             </div>
+            <div class="row">
+                {% if previousAlbum %}
+                    <h4 class="pull-left">Previous album:<br><br><a href="{% url 'album' artist=artist album=previousAlbum %}"> < {{ previousAlbum }}</a></h4>
+                {% endif %}
+                {% if nextAlbum %}
+                    <h4 class="pull-right">Next album:<br><br><a href="{% url 'album' artist=artist album=nextAlbum %}">{{ nextAlbum }} ></a></h4>
+                {% endif %}
+            </div>
         </div>
-        <div class="container" style="padding-top: 30px">
+        <div class="container" style="padding-top: 10px">
             <hr>
             <div class="row">
                 <div class="col-md-5">
                     {% if tracks|length > 0 %}
-                        <h3>Tracks in {{ album }}:</h3>
+                        <h3>Tracks in <span property="foaf:name">{{ album }}</span>:</h3>
                     {% else %}
                         <h2>Sorry, no tracks are available.</h2>
                     {% endif %}
@@ -53,9 +101,9 @@
                     {% if tracks|length > 0 %}
                         <ul class="list-group">
                             {% for track in tracks %}
-                                 <a href="#" class="list-group-item" property="cs:Track">
+                                 <a href="#" class="list-group-item" about="http://www.xpand.com/track/{{ artist }}/{{ track }}">
                                      <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;
-                                     {{ track }}
+                                     <span property="foaf:name">{{ track }}</span>
                                  </a>
                             {% endfor %}
                         </ul>
@@ -71,19 +119,54 @@
                                             {% for topAlbum in topAlbums %}
                                                 {% if topAlbum.0 != album %}
                                                     <br>
-                                                    <div class="row">
+                                                    <div class="row" about="http://www.xpand.com/album/{{ artist }}/{{ topAlbum.0 }}">
                                                         <div class="col-sm-3">
-                                                            <img class="img-rounded" height="70" width="70" src="{{ topAlbum.1 }}">
+                                                            <img class="img-rounded" height="70" width="70" src="{{ topAlbum.1 }}" property="foaf:Image">
                                                         </div>
                                                         <div class="col-sm-8">
                                                             <br>
                                                             <a href="{% url 'album' artist=artist album=topAlbum.0 %}" style="color: black">
-                                                                <h4 class="media-heading">{{ topAlbum.0 }}</h4>
+                                                                <h4 class="media-heading" property="foaf:name">{{ topAlbum.0 }}</h4>
                                                             </a>
                                                         </div>
                                                     </div>
                                                 {% endif %}
                                             {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                    {% if similarAlbums %}
+                        <div class="col-md-5 col-md-offset-2">
+                            <br><br>
+                            <h4>Other albums related to <a href="{% url 'album' artist=artist album=album %}" property="cs:Album">{{ album }}</a>:</h4>
+                            <div class="col-md-9 panel panel-default">
+                                <div class="panel-body">
+                                    <div class="tab-content clearfix">
+                                        <div class="tab-pane panel-body active" id="albums">
+                                            <div class="container" style="padding-left: 5px; padding-right: 5px;">
+                                                {% for related in similarAlbums %}
+                                                    {% if related.0 != album %}
+                                                        <br>
+                                                        <div class="row" about="http://www.xpand.com/album/{{ artist }}/{{ related.0 }}">
+                                                            <div class="col-sm-3">
+                                                                <img class="img-rounded" height="70" width="70" src="{{ related.1 }}" property="foaf:Image">
+                                                            </div>
+                                                            <div class="col-sm-8">
+                                                                <br>
+                                                                <h4 class="media-heading" property="foaf:name">
+                                                                    <a href="{% url 'album' artist=artist album=related.0 %}" style="color: black">
+                                                                        {{ related.0 }}
+                                                                    </a></h4>by
+                                                                <a href="{% url 'artist' artist=artist %}">{{ related.2 }}</a>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

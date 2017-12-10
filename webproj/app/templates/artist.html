@@ -2,22 +2,23 @@
 
 {% block content %}
     <section>
-        <div class="container" style="padding-top: 40px;">
+        <div class="container" style="padding-top: 40px;" about="http://www.xpand.com/artist/{{ artist }}">
             <div class="row">
                 <ol class="breadcrumb">
                     <li>Artist</li>
-                    <li class="active"><a href="{% url 'artist' artist=name %}">{{ name }}</a></li>
+                    <li class="active"><a href="{% url 'artist' artist=name %}" property="foaf:name">{{ name }}</a></li>
                 </ol>
             </div>
             <br>
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <img class="img-circle" src="{{ image }}">
+                    <img class="img-circle" src="{{ image }}" property="foaf:Image">
                 </div>
                 <div class="col-md-7">
                     <h1>
-                        {{ name }}
+                        <span property="foaf:name">{{ name }}</span>
                         {% if gender %}
+                            <span property="foaf:gender"></span>
                             {% if gender == 'male' %}
                                 &nbsp;<img src="../static/images/male.png" width="20" height="20">
                             {% else %}
@@ -25,33 +26,44 @@
                             {% endif %}
                         {% endif %}
                         {% if country %}
-                            <img src="../static/images/blank.gif" class="flag flag-{{ countryCode }}" alt="{{ country }}" />
+                            <img src="../static/images/blank.gif" class="flag flag-{{ countryCode }}" alt="{{ country }}" property="cs:country"/>
                         {% endif %}
                     </h1>
                     {% if tags|length > 1 %}
-                        <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                        {% for tag in tags %}
-                            <a href="{% url 'tag' tag=tag %}">
-                                <span class="label label-info">{{ tag }}</span>
-                            </a>
-                        {% endfor %}
+                        <p>
+                            <span class="glyphicon glyphicon-tags"></span>&nbsp;
+                            {% for tag in tags %}
+                                <a href="{% url 'tag' tag=tag %}" about="http://www.xpand.com/tags/{{ tag }}">
+                                    <span class="label label-info" property="foaf:name">{{ tag }}</span>
+                                </a>
+                            {% endfor %}
+                        </p>
                     {% endif %}
-                    <br><br>
-                    <p>{{ summary }}<br><br></p>
+                    <p class="text-justify" property="cs:biography">{{ summary }}<br><br></p>
                     {% if givenName %}
-                        <p><b>Given Name: </b>{{ givenName }}</p>
+                        <p><b>Given Name: </b><span property="foaf:givenName">{{ givenName }}</span></p>
                     {% endif %}
-                    {% if birthDate %}
-                        <p><b>Born: </b>{{ birthDate }}</p>
+                    {% if birthDate and age %}
+                        <p><b>Born: </b><span property="cs:birthDate">{{ birthDate }}</span> ({{ age }} years old)</p>
+                    {% endif %}
+                    {% if bands %}
+                        <p><b>Also a member of:</b>
+                            {% for band in bands %}
+                                <a href="{% url 'artist' artist=band %}" property="cs:isMember">{{ band }}</a>
+                                {% if not forloop.last %}
+                                    /
+                                {% endif %}
+                            {% endfor %}
+                        </p>
                     {% endif %}
                     {% if yearFounded %}
-                        <p><b>Founded in: </b>{{ yearFounded }}</p>
+                        <p><b>Founded in: </b><span property="cs:yearFounded">{{ yearFounded }}</span></p>
                     {% endif %}
                     {% if occupations %}
                         <p>
                             <b>Occupation:</b>
                             {% for occupation in occupations %}
-                                {{ occupation }}
+                                <span property="cs:occupation">{{ occupation }}</span>
                                 {% if not forloop.last %}
                                     /
                                 {% endif %}
@@ -62,7 +74,7 @@
                         <p>
                             <b>Genres:</b>
                             {% for genre in genres %}
-                                <a href="{% url 'tag' tag=genre %}">{{ genre }}</a>
+                                <a href="{% url 'tag' tag=genre %}" property="cs:genre">{{ genre }}</a>
                                 {% if not forloop.last %}
                                     /
                                 {% endif %}
@@ -73,7 +85,9 @@
                         <p>
                             <b>Record Label:</b>
                             {% for recorder in recorders %}
-                                {{ recorder }}
+                                <span property="cs:recorder">
+                                    {{ recorder }}
+                                </span>
                                 {% if not forloop.last %}
                                     /
                                 {% endif %}
@@ -84,7 +98,7 @@
                         <p>
                             <b>Band Members:</b>
                             {% for member in members %}
-                                <a href="{% url 'artist' artist=member %}">{{ member }}</a>
+                                <a href="{% url 'artist' artist=member %}" property="cs:bandMember">{{ member }}</a>
                                 {% if not forloop.last %}
                                     /
                                 {% endif %}
@@ -92,7 +106,7 @@
                         </p>
                     {% endif %}
                     {% if website %}
-                        <p><b>Official Website: </b><a href="{{ website }}">{{ website }}</a></p>
+                        <p><b>Official Website: </b><a href="{{ website }}" property="cs:website">{{ website }}</a></p>
                     {% endif %}
                 </div>
                 <br>
@@ -100,7 +114,7 @@
         </div>
         <br>
         <br>
-        {% if topAlbums|length > 0 and songs5|length > 0 and similars|length > 0 %}
+        {% if topAlbums|length > 0 or songs5|length > 0 or similars|length > 0 %}
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="row">
@@ -109,13 +123,15 @@
                                 <h4 align="center">Top Albums</h4>
                                 {% for album in topAlbums %}
                                     <br>
-                                    <div class="row">
+                                    <div class="row" about="http://www.xpand.com/album/{{ name }}/{{ album.0 }}">
                                         <div class="col-sm-5 text-right">
-                                            <img class="img-rounded" src="{{ album.1 }}" height="84" width="84">
+                                            <img class="img-rounded" src="{{ album.1 }}" height="84" width="84" property="foaf:Image">
                                         </div>
                                         <div class="col-sm-5" style="top: 50%;">
                                             <br>
-                                            <a href="{% url 'album' artist=name album=album.0 %}" style="font-weight: bold; color:black">{{ album.0 }}</a>
+                                            <a href="{% url 'album' artist=name album=album.0 %}" style="font-weight: bold; color:black" property="foaf:name">
+                                                {{ album.0 }}
+                                            </a>
                                         </div>
                                     </div>
                                     <br>
@@ -125,17 +141,17 @@
                             {% endif %}
                         </div>
                         <div class="col-sm-4">
-                            {% if songs5|length > 0 %}
+                            {% if songs5 %}
                                 <h4 align="center">Top Songs</h4>
                                 {% for song in songs5 %}
                                     <br>
-                                    <div class="row">
+                                    <div class="row" about="http://www.xpand.com/track/{{ name }}/{{ song.0 }}">
                                         <div class="col-sm-5 text-right">
-                                            <img class="img-rounded" src="{{ song.1 }}" height="84" width="84">
+                                            <img class="img-rounded" src="{{ song.1 }}" height="84" width="84" property="foaf:Image">
                                         </div>
                                         <div class="col-sm-5">
                                             <br>
-                                            {{ song.0 }}
+                                            <span property="foaf:name">{{ song.0 }}</span>
                                         </div>
                                     </div>
                                     <br>
@@ -145,17 +161,17 @@
                             {% endif %}
                         </div>
                         <div class="col-sm-4">
-                            {% if songs5|length > 0 %}
+                            {% if similars %}
                                 <h4 align="center">Related</h4>
                                 {% for artist in similars %}
                                     <br>
-                                    <div class="row">
+                                    <div class="row" about="http://www.xpand.com/artist/{{ artist.0 }}">
                                         <div class="col-sm-5 text-right">
-                                            <img class="img-circle" src="{{ artist.1 }}" height="84" width="84">
+                                            <img class="img-circle" src="{{ artist.1 }}" height="84" width="84" property="foaf:Image">
                                         </div>
                                         <div class="col-sm-5">
                                             <br>
-                                            <a href="{% url 'artist' artist=artist.0 %}" style="font-weight: bold; color:black">{{ artist.0 }}</a>
+                                            <a href="{% url 'artist' artist=artist.0 %}" style="font-weight: bold; color:black" property="foaf:name">{{ artist.0 }}</a>
                                         </div>
                                     </div>
                                     <br>
@@ -170,7 +186,7 @@
         {% else %}
             <h4 class="text-center"><br>Sorry, we don't have yet more data about this artist.
                 <br><br>
-                Please try again soon.
+                How about search for it?
             </h4>
         {% endif %}
         <br><br>

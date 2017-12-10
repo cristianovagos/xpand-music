@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^news/$', views.news, name='news'),
     url(r'^search/$', views.search, name='search'),
     url(r'^top/tags/$', views.topArtistsByTag, name='topTags'),
+    url(r'^top/countries/$', views.topArtistsByCountry, name='topCountries'),
     # url(r'^top/tags/(?P<page>[0-9]+)$', views.topTagsPage),
     url(r'^top/artists/$', views.topArtists, name='topArtists'),
     url(r'^top/artists/(?P<page>[0-9]+)$', views.topArtistsPage, name='topArtistsPage'),

@@ -5,7 +5,7 @@
             <div class="row">
                 <ol class="breadcrumb">
                     <li>Top</li>
-                    <li class="active">Top Tags</li>
+                    <li class="active">Top Countries</li>
                 </ol>
             </div>
         </div>
@@ -13,19 +13,20 @@
         <div class="container">
         <br>
             <div class="row">
-                <h1 align="center">Top Tags</h1>
+                <h1 align="center">Top Countries</h1>
                 <div class="container">
-                    {% if tags %}
-                        {% for tag in tags %}
+                    {% if countries %}
+                        {% for country in countries %}
                             <br>
-                            <a href="{% url 'tag' tag=tag %}">
-                                <h2>{{ tag }}</h2>
-                            </a>
+                            <h2>
+                                {{ country.0 }}
+                                <img src="/static/images/blank.gif" class="flag flag-{{ country.1 }}"/>
+                            </h2>
                             <br>
                             {% for artist in topArtists %}
                                 <div class="row">
                                 {% for key in artist %}
-                                    {% if key.tag == tag %}
+                                    {% if key.country == country.0 %}
                                         {% if artist|length == 1 %}
                                         <div class="col-sm-12 text-center">
                                         {% elif artist|length == 2 %}
@@ -54,7 +55,7 @@
                     {% else %}
                         <div class="row">
                             <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">
-                                Sorry, no more artists found. How about search for it?
+                                Sorry, no artists and countries found. How about search for it?
                             </h3>
                         </div>
                     {% endif %}

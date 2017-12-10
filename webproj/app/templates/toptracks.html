@@ -14,64 +14,72 @@
             <div class="row">
                 <h1 class="text-center">Top Tracks</h1>
             </div>
-            <div class="row" style="padding-top: 20px;">
-                <div class="col-md-1"></div>
-                {% for track in topTracks %}
-                    {% if forloop.counter0|divisibleby:5 %}
-                        <div class="row" style="padding-top: 20px;">
-                            <div class="col-md-1"></div>
-                    {% endif %}
-                            <div class="col-sm-2 text-center">
-                                <a href="{% url 'artist' artist=track.0 %}">
-                                    <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
-                                </a>
+            {% if topTracks %}
+                <div class="row" style="padding-top: 20px;">
+                    <div class="col-md-1"></div>
+                    {% for track in topTracks %}
+                        {% if forloop.counter0|divisibleby:5 %}
+                            <div class="row" style="padding-top: 20px;">
+                                <div class="col-md-1"></div>
+                        {% endif %}
+                                <div class="col-sm-2 text-center">
+                                    <a href="{% url 'artist' artist=track.0 %}">
+                                        <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
+                                    </a>
+                                    <br><br>
+                                    <h4 class="media-heading text-center" style="color:black">
+                                        "{{ track.1 }}"
+                                    </h4>
+                                    <h5 class="media-heading text-center" style="color:black">
+                                        by
+                                        <a href="{% url 'artist' artist=track.0 %}" style="color:black">{{ track.0 }}</a>
+                                    </h5>
+                                </div>
+                        {% if forloop.counter|divisibleby:5 %}
                                 <br><br>
-                                <h4 class="media-heading text-center" style="color:black">
-                                    "{{ track.1 }}"
-                                </h4>
-                                <h5 class="media-heading text-center" style="color:black">
-                                    by
-                                    <a href="{% url 'artist' artist=track.0 %}" style="color:black">{{ track.0 }}</a>
-                                </h5>
                             </div>
-                    {% if forloop.counter|divisibleby:5 %}
-                            <br><br>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                <div class="col-md-1"></div>
-            </div>
-        </div>
-        <nav class="text-center" aria-label="Page navigation" style="padding-top: 30px;">
-          <ul class="pagination">
-              {% if page > 1 %}
-                  <li>
-                    <a href="{% url 'topTracksPage' page=page|add:"-1" %}" aria-label="Previous">
-              {% elif page == 1 %}
-                  <li class="disabled">
-                    <a href="{% url 'topTracks' %}" aria-label="Previous">
-              {% else %}
-                  <li>
-                    <a href="{% url 'topTracks' %}" aria-label="Previous">
-              {% endif %}
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-            </li>
-            {% if page == 1 %}
-                <li class="active"><a href="{% url 'topTracks' %}">{{ page }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="col-md-1"></div>
+                </div>
             {% else %}
-                <li class="active"><a href="{% url 'topTracksPage' page=page %}">{{ page }}</a></li>
+                <div class="row">
+                    <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">Sorry, no tracks found. How about search for it?</h3>
+                </div>
             {% endif %}
-            <li><a href="{% url 'topTracksPage' page=page|add:1 %}">{{ page|add:1 }}</a></li>
-            <li><a href="{% url 'topTracksPage' page=page|add:2 %}">{{ page|add:2 }}</a></li>
-            <li><a href="{% url 'topTracksPage' page=page|add:3 %}">{{ page|add:3 }}</a></li>
-            <li><a href="{% url 'topTracksPage' page=page|add:4 %}">{{ page|add:4 }}</a></li>
-            <li>
-              <a href="{% url 'topTracksPage' page=page|add:1 %}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+        </div>
+        {% if topTracks %}
+            <nav class="text-center" aria-label="Page navigation" style="padding-top: 30px;">
+                <ul class="pagination">
+                    {% if page > 1 %}
+                        <li>
+                            <a href="{% url 'topTracksPage' page=page|add:"-1" %}" aria-label="Previous">
+                    {% elif page == 1 %}
+                        <li class="disabled">
+                            <a href="{% url 'topTracks' %}" aria-label="Previous">
+                    {% else %}
+                        <li>
+                            <a href="{% url 'topTracks' %}" aria-label="Previous">
+                    {% endif %}
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% if page == 1 %}
+                        <li class="active"><a href="{% url 'topTracks' %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="active"><a href="{% url 'topTracksPage' page=page %}">{{ page }}</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'topTracksPage' page=page|add:1 %}">{{ page|add:1 }}</a></li>
+                    <li><a href="{% url 'topTracksPage' page=page|add:2 %}">{{ page|add:2 }}</a></li>
+                    <li><a href="{% url 'topTracksPage' page=page|add:3 %}">{{ page|add:3 }}</a></li>
+                    <li><a href="{% url 'topTracksPage' page=page|add:4 %}">{{ page|add:4 }}</a></li>
+                    <li>
+                        <a href="{% url 'topTracksPage' page=page|add:1 %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
     </section>
 {% endblock %}

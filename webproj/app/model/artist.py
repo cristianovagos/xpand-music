@@ -8,10 +8,17 @@ from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, \
 from ..db.BaseXClient import Session
 from ..model.tag import Tag
 from ..utils.countries import getISOCode
+from ..utils.dates import calculateAge
 from s4api.graphdb_api import GraphDBApi
 from s4api.swagger import ApiClient
 from collections import Counter
+from datetime import datetime
 from wikidata.client import Client
+
+
+# dados de ligação ao GraphDB
+ENDPOINT = "http://localhost:7200"
+REPO_NAME = "xpand-music"
 
 class Artist:
 
@@ -36,8 +43,11 @@ class Artist:
         self.country = None
         self.givenName = None
         self.birthDate = None
+        self.age = None
         self.yearFounded = None
         self.band = False
+        self.bands = []
+        self.wikiData = False
 
         self.max_items = max_items
 
@@ -66,10 +76,7 @@ class Artist:
 
 
     def fetchInfoGraphDB(self):
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -89,7 +96,7 @@ class Artist:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -119,7 +126,7 @@ class Artist:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -129,7 +136,8 @@ class Artist:
             albumInfo.append(e['albumCover']['value'])
             albumInfo.append(e['albumPlayCount']['value'])
 
-            self.topAlbums.append(albumInfo)
+            if albumInfo not in self.topAlbums:
+                self.topAlbums.append(albumInfo)
 
         # so ficar com o numero de albuns mais ouvidos
         self.topAlbums = self.topAlbums[:self.max_items]
@@ -158,7 +166,7 @@ class Artist:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -190,7 +198,7 @@ class Artist:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
@@ -242,15 +250,24 @@ class Artist:
                         OPTIONAL {
                             ?artista cs:yearFounded ?yearFounded .
                         }
+                        OPTIONAL {
+                            ?artista cs:isMember ?band .
+                            ?band foaf:name ?bandName .
+                        }
                     }
                 """ % (quote(self.name))
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         for e in res['results']['bindings']:
+            try:
+                self.bands.append(unquote(e['bandName']['value']))
+            except Exception:
+                self.bands = None
+
             try:
                 self.members.append(unquote(e['member']['value']))
             except Exception:
@@ -292,9 +309,12 @@ class Artist:
                 self.givenName = None
 
             try:
-                self.birthDate = unquote(e['birthDate']['value'])
+                tmpDate = datetime.strptime(unquote(e['birthDate']['value']), '%Y-%m-%d')
+                self.birthDate = tmpDate.strftime('%d/%m/%Y')
+                self.age = calculateAge(tmpDate)
             except Exception:
                 self.birthDate = None
+                self.age = None
 
             try:
                 self.yearFounded = unquote(e['yearFounded']['value'])
@@ -309,19 +329,8 @@ class Artist:
             self.recorders = list(set(self.recorders))
         if self.genres:
             self.genres = list(set(self.genres))
-
-        # print(self.name)
-        # print("Members: ", self.members)
-        # print("Gender: ", self.gender)
-        # print("Occupation: ", self.occupation)
-        # print("Recorders: ", self.recorders)
-        # print("Genres: ", self.genres)
-        # print("Website: ", self.website)
-        # print("Country: ", self.country)
-        # print("Given Name: ", self.givenName)
-        # print("Birth Date: ", self.birthDate)
-        # print("Year Founded: ", self.yearFounded)
-
+        if self.bands:
+            self.bands = list(set(self.bands))
 
     def fetchInfoDatabase(self):
         result = False
@@ -448,12 +457,8 @@ class Artist:
 
     # verificar se o artista já existe no GraphDB
     def checkGraphDB(self):
-        # dados de ligação ao GraphDB
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
         # ligar ao GraphDB
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -470,7 +475,7 @@ class Artist:
         # executar query via API do GraphDB
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         # percorrer resultados da query
@@ -600,12 +605,8 @@ class Artist:
             g = rdflib.Graph()
             g.parse(data=finalArtist, format="application/rdf+xml")
 
-            # dados para ligação ao GraphDB
-            endpoint = "http://localhost:7200"
-            repo_name = "xpand-music"
-
             # ligar ao GraphDB
-            client = ApiClient(endpoint=endpoint)
+            client = ApiClient(endpoint=ENDPOINT)
             accessor = GraphDBApi(client)
 
             print("Inserting artist into GraphDB...")
@@ -627,13 +628,13 @@ class Artist:
                 # Enviar a query via API do GraphDB
                 payload_query = {"update": query}
                 res = accessor.sparql_update(body=payload_query,
-                                             repo_name=repo_name)
+                                             repo_name=REPO_NAME)
+                
+            # Retirar dados da WikiData
+            self.fetchWikiData()
 
             # Verificar inferencias
             self.checkInferences()
-
-            # Retirar dados da WikiData
-            self.fetchWikiData()
 
             # Retirar dados do GraphDB e preencher atributos da classe
             self.fetchInfoGraphDB()
@@ -680,8 +681,9 @@ class Artist:
                 break
             elif str(list.label) != "human":
                 return
-
-        print("Human detected")
+        
+        if not self.band:
+            print("Human detected")
 
         # Saber ocupação
         occupation = []
@@ -780,13 +782,8 @@ class Artist:
             except Exception:
                 bandMembers = None
 
-
-        # dados de ligação ao GraphDB
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
         # ligar ao GraphDB
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         artistURI = self.getArtistURI()
@@ -860,15 +857,13 @@ class Artist:
         # executar query via API do GraphDB
         payload_query = {"update": query}
         res = accessor.sparql_update(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
+        
+        self.wikiData = True
 
     def getArtistURI(self):
-        # dados de ligação ao GraphDB
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
         # ligar ao GraphDB
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         query = """
@@ -885,7 +880,7 @@ class Artist:
         # executar query via API do GraphDB
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         # percorrer resultados da query
@@ -896,12 +891,8 @@ class Artist:
         # Inferencia Artistas Semelhantes
         # Consideram-se semelhantes artistas que tenham pelo menos 3 tags em comum
 
-        # dados de ligação ao GraphDB
-        endpoint = "http://localhost:7200"
-        repo_name = "xpand-music"
-
         # ligar ao GraphDB
-        client = ApiClient(endpoint=endpoint)
+        client = ApiClient(endpoint=ENDPOINT)
         accessor = GraphDBApi(client)
 
         # obter artistas com as mesmas tags que este artista
@@ -922,7 +913,7 @@ class Artist:
 
         payload_query = {"query": query}
         res = accessor.sparql_select(body=payload_query,
-                                     repo_name=repo_name)
+                                     repo_name=REPO_NAME)
         res = json.loads(res)
 
         artistsWithSameTags = []
@@ -956,7 +947,52 @@ class Artist:
                 # Enviar a query via API do GraphDB
                 payload_query = {"update": query}
                 res = accessor.sparql_update(body=payload_query,
-                                             repo_name=repo_name)
+                                             repo_name=REPO_NAME)
+
+
+        # Se não houver dados da wikiData não vale a pena continuar
+        if not self.wikiData:
+            return
+
+        # Inferencia membro de uma banda
+
+        # Descobrir URIs de banda/artista
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT ?band ?artist
+                    WHERE{
+                        ?band rdf:type cs:MusicArtist .
+                        ?band cs:bandMember "%s" .
+                        ?artist rdf:type cs:MusicArtist .
+                        ?artist foaf:name "%s" .
+                    }
+                """ % (quote(self.name), quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            # obter uris
+            uriBand = e['band']['value']
+            uriArtist = e['artist']['value']
+
+            query = """
+                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                        PREFIX cs: <http://www.xpand.com/rdf/>
+                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                        INSERT DATA {
+                            <%s> cs:isMember <%s> .
+                        }
+                    """ % (uriArtist, uriBand)
+
+            payload_query = {"update": query}
+            res = accessor.sparql_update(body=payload_query,
+                                         repo_name=REPO_NAME)
+
 
 
     def transformArtist(self):
@@ -1339,8 +1375,14 @@ class Artist:
     def getBirthDate(self):
         return self.birthDate
 
+    def getAge(self):
+        return self.age
+
     def getYearFounded(self):
         return self.yearFounded
+
+    def getBands(self):
+        return self.bands
 
     def isBand(self):
         return self.band
