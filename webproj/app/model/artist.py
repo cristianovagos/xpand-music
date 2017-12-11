@@ -656,6 +656,7 @@ class Artist:
 
         client = Client()
         entity = None
+        occupation = None
         musician = False
 
         if ids:

@@ -8,6 +8,7 @@ from ..model.tag import Tag
 from ..api.urls import getAlbumInfoURL, getAlbumInfoIDURL, getTrackInfoURL
 from ..db.BaseXClient import Session
 from ..utils.dates import calculateAge
+from ..utils.youtube import getYoutubeVideoID
 from datetime import datetime
 from s4api.graphdb_api import GraphDBApi
 from s4api.swagger import ApiClient
@@ -213,9 +214,13 @@ class Album:
                         ?album rdf:type cs:Album .
                         ?album foaf:name "%s" .
                         ?album foaf:Image ?imagem .
-                        ?album cs:Tag ?tag .
-                        ?album cs:biography ?biografia .
-                        ?tag foaf:name ?tagName .
+                        OPTIONAL{
+                            ?album cs:biography ?biografia .
+                        }
+                        OPTIONAL {
+                            ?album cs:Tag ?tag .
+                            ?tag foaf:name ?tagName .
+                        }
                     }
                 """ % (quote(self.name))
 
@@ -226,9 +231,12 @@ class Album:
 
         for e in res['results']['bindings']:
             self.image = e['imagem']['value']
-            Tag(unquote(e['tagName']['value']), displayTop=False)
-            self.tags.append(unquote(e['tagName']['value']))
             self.wikiTextShort = unquote(e['biografia']['value'])
+            try:
+                Tag(unquote(e['tagName']['value']), displayTop=False)
+                self.tags.append(unquote(e['tagName']['value']))
+            except Exception:
+                pass
 
         # outra query para as tracks
 
@@ -251,7 +259,15 @@ class Album:
         res = json.loads(res)
 
         for e in res['results']['bindings']:
-            self.tracks.append(unquote(e['trackname']['value']))
+            aux = []
+
+            print("Fetching " + unquote(e['trackname']['value']) + " Youtube Video")
+            youtubeVideoID = getYoutubeVideoID(self.artist, unquote(e['trackname']['value']))
+
+            aux.append(unquote(e['trackname']['value']))
+            aux.append(youtubeVideoID)
+
+            self.tracks.append(aux)
 
             # Inserir Track no GraphDB
             self.transformTrackRDF(e['trackname']['value'])

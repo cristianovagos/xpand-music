@@ -197,5 +197,10 @@ a:hover {
 }
 
 .text-justify {
-  text-align: justify;
+    text-align: justify;
+}
+
+.modal-content iframe{
+    margin: 0 auto;
+    display: block;
 }
