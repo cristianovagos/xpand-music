@@ -27,8 +27,10 @@ class Tag:
         # self.fetchInfo()
 
         if self.checkGraphDB():
+            print("Fetching tag " + self.name + " from GraphDB")
             self.fetchInfoGraphDB()
         else:
+            print("Fetching tag " + self.name + " from API")
             self.transformTagRDF()
 
 

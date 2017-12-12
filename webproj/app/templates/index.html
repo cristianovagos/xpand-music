@@ -62,7 +62,11 @@
                         {% endif %}
                         <div class="col-sm-5">
                             <div class="card">
-                                <img class="img-rounded" src="{{ noticia.image }}" height="250" width="250">
+                                {% if not topArtists and not topTracks %}
+                                    <img class="img-rounded" src="{{ noticia.image }}" height="250" width="250" style="margin-left: 20%;">
+                                {% else %}
+                                    <img class="img-rounded" src="{{ noticia.image }}" height="250" width="250">
+                                {% endif %}
                                 <div class="card-block">
                                     <a href="{{ noticia.link }}">
                                         <h4 class="card-title" style="width: 100%;">{{ noticia.title }}</h4>

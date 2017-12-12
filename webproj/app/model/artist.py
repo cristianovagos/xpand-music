@@ -88,9 +88,12 @@ class Artist:
                         ?artista rdf:type cs:MusicArtist .
                         ?artista foaf:name "%s" .
                         ?artista foaf:Image ?imagem .
-                        ?artista cs:Tag ?tag .
                         ?artista cs:biography ?biografia .
-                        ?tag foaf:name ?tagName .
+                        
+                        OPTIONAL {
+                            ?artista cs:Tag ?tag .
+                            ?tag foaf:name ?tagName .
+                        }
                     }
                 """ % (quote(self.name))
 
@@ -180,6 +183,38 @@ class Artist:
 
         # so ficar com o numero de tracks mais ouvidas
         self.topTracks = self.topTracks[:self.max_items]
+
+        # Comments
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                    SELECT ?commentNum ?commentUser ?commentText
+                    WHERE{
+                        ?artista rdf:type cs:MusicArtist .
+                        ?artista foaf:name "%s" .
+                        ?artista cs:Comment ?comment .
+                        ?comment cs:commentNum ?commentNum .
+                        ?comment cs:commentUser ?commentUser .
+                        ?comment cs:commentText ?commentText .
+                    }
+                    ORDER BY DESC(xsd:integer(?commentNum))
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            commentInfo = []
+
+            commentInfo.append(unquote(e['commentUser']['value']))
+            commentInfo.append(unquote(e['commentText']['value']))
+            commentInfo.append(e['commentNum']['value'])
+
+            self.comments.append(commentInfo)
 
         # Similar Artists
         query = """
@@ -991,6 +1026,171 @@ class Artist:
             res = accessor.sparql_update(body=payload_query,
                                          repo_name=REPO_NAME)
 
+    def storeCommentRDF(self, user, text):
+        # ligar ao GraphDB
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT ?artista (count(?comment) as ?numComments)
+                    WHERE {
+                        ?artista rdf:type cs:MusicArtist .
+                        ?artista foaf:name "%s" .
+                        OPTIONAL {
+                            ?artista cs:Comment ?comment .
+                        }
+                    } 
+                    GROUP BY ?artista
+                """ % (quote(self.name))
+
+        # executar query via API do GraphDB
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        artistURI = None
+        numComment = 0
+
+        # percorrer resultados da query
+        for e in res['results']['bindings']:
+            artistURI = e['artista']['value']
+            try:
+                numComment = int(e['numComments']['value'])
+            except Exception:
+                numComment = 0
+
+        if artistURI:
+            numComment += 1
+            commentURI = str(artistURI) + '/comment/' + str(numComment)
+
+            query = """
+                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                        PREFIX cs: <http://www.xpand.com/rdf/>
+                        INSERT DATA {
+                            <%s> rdf:type cs:Comment .
+                            <%s> cs:commentNum "%s" .
+                            <%s> cs:commentUser "%s" .
+                            <%s> cs:commentText "%s" .
+                            <%s> cs:Comment <%s> .
+                        }
+                    """ \
+                    % (commentURI, commentURI, numComment, commentURI, quote(user), commentURI, quote(text), artistURI, commentURI)
+
+            # executar query via API do GraphDB
+            payload_query = {"update": query}
+            res = accessor.sparql_update(body=payload_query,
+                                         repo_name=REPO_NAME)
+
+    def changeCommentRDF(self, numComment, newText):
+        # ligar ao GraphDB
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT *
+                    WHERE {
+                        ?artista rdf:type cs:MusicArtist .
+                        ?artista foaf:name "%s" .
+                        ?artista cs:Comment ?id .
+                        ?id cs:commentNum "%d" .
+                        ?id cs:commentText ?text .
+                    }
+                """ \
+        % (quote(self.name), int(numComment))
+
+        # executar query via API do GraphDB
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        # percorrer resultados da query
+        for e in res['results']['bindings']:
+            oldText = unquote(e['text']['value'])
+
+            if oldText:
+                query = """
+                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                            PREFIX cs: <http://www.xpand.com/rdf/>
+                            DELETE {
+                                ?id cs:commentText "%s" .
+                            }
+                            INSERT {
+                                ?id cs:commentText "%s" .
+                            }
+                            WHERE {
+                                ?artista rdf:type cs:MusicArtist .
+                                ?artista foaf:name "%s" .
+                                ?artista cs:Comment ?id .
+                                ?id cs:commentNum "%d" .
+                            }
+                        """ \
+                        % (quote(oldText), quote(newText), quote(self.name), int(numComment))
+
+                # executar query via API do GraphDB
+                payload_query = {"update": query}
+                res = accessor.sparql_update(body=payload_query,
+                                             repo_name=REPO_NAME)
+
+    def deleteCommentRDF(self, numComment):
+        # ligar ao GraphDB
+        client = ApiClient(endpoint=ENDPOINT)
+        accessor = GraphDBApi(client)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    SELECT ?comment ?commentNum
+                    WHERE {
+                        ?artista rdf:type cs:MusicArtist .
+                        ?artista foaf:name "%s" .
+                        OPTIONAL {
+                            ?artista cs:Comment ?comment .
+                            ?comment cs:commentNum ?commentNum .
+                        }
+                    }
+                """ % (quote(self.name))
+
+        # executar query via API do GraphDB
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        # percorrer resultados da query
+        for e in res['results']['bindings']:
+            if int(e['commentNum']['value']) == int(numComment):
+                query = """
+                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                            PREFIX cs: <http://www.xpand.com/rdf/>
+                            DELETE {
+                                ?id ?p ?v .
+                            }
+                            WHERE {
+                                ?id rdf:type cs:Comment .
+                                ?artista rdf:type cs:MusicArtist .
+                                ?artista foaf:name "%s" .
+                                ?artista cs:Comment ?id .
+                                ?id cs:commentNum "%d" .
+                                ?id ?p ?v .
+                            }
+                        """ \
+                        % (quote(self.name), int(numComment))
+
+                # executar query via API do GraphDB
+                payload_query = {"update": query}
+                res = accessor.sparql_update(body=payload_query,
+                                             repo_name=REPO_NAME)
 
 
     def transformArtist(self):

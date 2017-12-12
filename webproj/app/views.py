@@ -45,16 +45,19 @@ def album(request, album, artist):
 
             if form.is_valid():
                 text = str(request.POST['comment'])
-                albumObj.storeComment('User', text)
+                # albumObj.storeComment('User', text)
+                albumObj.storeCommentRDF('User', text)
                 albumObj = Album(str(album), str(artist))
         elif request.POST['form-type'] == 'edit-form':
             edit = str(request.POST['editComment'])
             commentID = str(request.POST['commentID'])
-            albumObj.changeComment(commentID, edit)
+            # albumObj.changeComment(commentID, edit)
+            albumObj.changeCommentRDF(commentID, edit)
             albumObj = Album(str(album), str(artist))
         else:
             commentID = str(request.POST['commentID'])
-            albumObj.deleteComment(commentID)
+            # albumObj.deleteComment(commentID)
+            albumObj.deleteCommentRDF(commentID)
             albumObj = Album(str(album), str(artist))
 
 
@@ -111,16 +114,19 @@ def artist(request, artist):
 
             if form.is_valid():
                 text = str(request.POST['comment'])
-                artistObj.storeComment('User', text)
+                # artistObj.storeComment('User', text)
+                artistObj.storeCommentRDF('User', text)
                 artistObj = Artist(artist)
         elif request.POST['form-type'] == 'edit-form':
             edit = str(request.POST['editComment'])
             commentID = str(request.POST['commentID'])
-            artistObj.changeComment(commentID, edit)
+            # artistObj.changeComment(commentID, edit)
+            artistObj.changeCommentRDF(commentID, edit)
             artistObj = Artist(artist)
         else:
             commentID = str(request.POST['commentID'])
-            artistObj.deleteComment(commentID)
+            # artistObj.deleteComment(commentID)
+            artistObj.deleteCommentRDF(commentID)
             artistObj = Artist(artist)
 
     tparams = {
