@@ -3,7 +3,7 @@ from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 
 def searchArtist(artistSearch):
-    url = getArtistSearchURL(artistSearch, 4, 1)
+    url = getArtistSearchURL(artistSearch, 12, 1)
     file = urlopen(url)
 
     straux = str(file.read().decode())
@@ -23,7 +23,7 @@ def searchArtist(artistSearch):
     return result
 
 def searchAlbum(albumSearch):
-    url = getAlbumSearchURL(albumSearch, 4, 1)
+    url = getAlbumSearchURL(albumSearch, 12, 1)
     file = urlopen(url)
 
     straux = str(file.read().decode())

@@ -101,31 +101,35 @@
                     {% if tracks|length > 0 %}
                         <ul class="list-group">
                             {% for track in tracks %}
-                                <a href="#t{{ forloop.counter }}" class="list-group-item" about="http://www.xpand.com/track/{{ artist }}/{{ track.0 }}" data-toggle="modal">
+                                {% if track.1 %}
+                                <a href="#" class="list-group-item" about="http://www.xpand.com/track/{{ artist }}/{{ track.0 }}"
+                                   data-toggle="modal" data-target="#videoModal" data-videoID="https://www.youtube.com/embed/{{ track.1 }}"
+                                   data-videoTitle="Listen to {{ track.0 }}, by {{ artist }}">
+                                {% else %}
+                                <a href="#" class="list-group-item" about="http://www.xpand.com/track/{{ artist }}/{{ track.0 }}">
+                                {% endif %}
                                     <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;
                                     <span property="foaf:name">{{ track.0 }}</span>
                                     {% if track.1 %}
                                         <span class="glyphicon glyphicon-play-circle pull-right"></span>
                                     {% endif %}
                                 </a>
-                                {% if track.1 %}
-                                    <div id="t{{ forloop.counter }}" class="modal fade in">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                                    <h4 class="modal-title">Listen to "{{ track.0 }}", by {{ artist }}</h4>
-                                                </div>
-                                                <div class="modal-body" style="padding: 10px;">
-                                                    <iframe id="musicVideo" width="560" height="315" src="https://www.youtube.com/embed/{{ track.1 }}" frameborder="0" allowfullscreen></iframe>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
                             {% endfor %}
                         </ul>
                     {% endif %}
+                    <div id="videoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title"></h4>
+                                </div>
+                                <div class="modal-body" style="padding: 10px;">
+                                    <iframe width="560" height="315" src="" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-5 col-md-offset-2">
                     {% if topAlbums|length > 1 %}

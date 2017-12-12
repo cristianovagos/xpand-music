@@ -39,6 +39,10 @@ class Artist:
         self.recorders = []
         self.genres = []
         self.website = None
+        self.facebookID = None
+        self.youtubeID = None
+        self.instagramID = None
+        self.twitterID = None
         self.gender = None
         self.country = None
         self.givenName = None
@@ -274,6 +278,18 @@ class Artist:
                             ?artista cs:website ?website .
                         }
                         OPTIONAL {
+                            ?artista cs:facebookID ?facebookID .
+                        }
+                        OPTIONAL {
+                            ?artista cs:twitterID ?twitterID .
+                        }
+                        OPTIONAL {
+                            ?artista cs:instagramID ?instagramID .
+                        }
+                        OPTIONAL {
+                            ?artista cs:youtubeID ?youtubeID .
+                        }
+                        OPTIONAL {
                             ?artista cs:country ?country .
                         }
                         OPTIONAL {
@@ -332,6 +348,26 @@ class Artist:
                 self.website = unquote(e['website']['value'])
             except Exception:
                 self.website = None
+
+            try:
+                self.facebookID = unquote(e['facebookID']['value'])
+            except Exception:
+                self.facebookID = None
+
+            try:
+                self.twitterID = unquote(e['twitterID']['value'])
+            except Exception:
+                self.twitterID = None
+
+            try:
+                self.instagramID = unquote(e['instagramID']['value'])
+            except Exception:
+                self.instagramID = None
+
+            try:
+                self.youtubeID = unquote(e['youtubeID']['value'])
+            except Exception:
+                self.youtubeID = None
 
             try:
                 self.country = unquote(e['country']['value'])
@@ -760,7 +796,31 @@ class Artist:
         except Exception:
             website = None
 
-        bandMembers = gender = birthName = birthDate = year = None
+        facebookProperty = client.get('P2013')
+        try:
+            facebookID = str(entity[facebookProperty])
+        except Exception:
+            facebookID = None
+
+        twitterProperty = client.get('P2002')
+        try:
+            twitterID = str(entity[twitterProperty])
+        except Exception:
+            twitterID = None
+
+        instagramProperty = client.get('P2003')
+        try:
+            instagramID = str(entity[instagramProperty])
+        except Exception:
+            instagramID = None
+
+        youtubeProperty = client.get('P2397')
+        try:
+            youtubeID = str(entity[youtubeProperty])
+        except Exception:
+            youtubeID = None
+
+        bandMembers = gender = birthName = birthDate = year =  None
 
         if not self.band:
             # Sexo
@@ -780,7 +840,7 @@ class Artist:
             # Nome de Nascimento
             birthNameProperty = client.get('P1477')
             try:
-                birthName = str(entity[birthNameProperty].label)
+                birthName = str(entity[birthNameProperty])
             except Exception:
                 birthName = None
 
@@ -857,6 +917,26 @@ class Artist:
                 query += """
                         <%s> cs:website "%s" .
                 """ % (artistURI, quote(website))
+
+        if (facebookID):
+                query += """
+                        <%s> cs:facebookID "%s" .
+                """ % (artistURI, quote(facebookID))
+
+        if (twitterID):
+                query += """
+                        <%s> cs:twitterID "%s" .
+                """ % (artistURI, quote(twitterID))
+
+        if (instagramID):
+                query += """
+                        <%s> cs:instagramID "%s" .
+                """ % (artistURI, quote(instagramID))
+
+        if (youtubeID):
+                query += """
+                        <%s> cs:youtubeID "%s" .
+                """ % (artistURI, quote(youtubeID))
 
         if (gender):
                 query += """
@@ -1557,6 +1637,18 @@ class Artist:
 
     def getWebsite(self):
         return self.website
+
+    def getFacebookID(self):
+        return self.facebookID
+
+    def getTwitterID(self):
+        return self.twitterID
+
+    def getYoutubeID(self):
+        return self.youtubeID
+
+    def getInstagramID(self):
+        return self.instagramID
 
     def getGender(self):
         return self.gender

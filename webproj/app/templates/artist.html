@@ -39,6 +39,21 @@
                             {% endfor %}
                         </p>
                     {% endif %}
+                    <div class="pull-right" style="margin-top: -45px;">
+                        {% if facebookID %}
+                            <a href="https://www.facebook.com/{{ facebookID }}"><img src="../static/images/facebook.png"/></a>
+                        {% endif %}
+                        {% if instagramID %}
+                            <a href="https://www.instagram.com/{{ instagramID }}/"><img src="../static/images/instagram.png"/></a>
+                        {% endif %}
+                        {% if twitterID %}
+                            <a href="https://twitter.com/{{ twitterID }}"><img src="../static/images/twitter.png"/></a>
+                        {% endif %}
+                        {% if youtubeID %}
+                            <a href="https://www.youtube.com/channel/{{ youtubeID }}"><img src="../static/images/youtube.png"/></a>
+                        {% endif %}
+                    </div>
+                    <br>
                     <p class="text-justify" property="cs:biography">{{ summary }}<br><br></p>
                     {% if givenName %}
                         <p><b>Given Name: </b><span property="foaf:givenName">{{ givenName }}</span></p>
