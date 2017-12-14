@@ -31,7 +31,7 @@ def getTopTracksGraphDB(num=5, page=1):
                 PREFIX cs: <http://www.xpand.com/rdf/>
                 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                SELECT ?artistName ?albumCover ?trackName
+                SELECT ?artistName ?albumCover ?trackName ?youtubeID
                 WHERE{
                     ?track rdf:type cs:Track .
                     ?track foaf:name ?trackName .
@@ -40,6 +40,9 @@ def getTopTracksGraphDB(num=5, page=1):
                     ?track cs:MusicArtist ?artist .
                     ?artist foaf:name ?artistName .
                     ?trackAlbum foaf:Image ?albumCover .
+                    OPTIONAL {
+                        ?track cs:youtubeVideo ?youtubeID .
+                    }
                 }
                 ORDER BY DESC(xsd:integer(?trackPlayCount))
             """
@@ -61,6 +64,10 @@ def getTopTracksGraphDB(num=5, page=1):
         aux.append(unquote(e['artistName']['value']))
         aux.append(unquote(e['trackName']['value']))
         aux.append(e['albumCover']['value'])
+        try:
+            aux.append(unquote(e['youtubeID']['value']))
+        except Exception:
+            aux.append(None)
         result.append(aux)
         i += 1
 

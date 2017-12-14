@@ -238,15 +238,19 @@ class Tag:
                         PREFIX cs: <http://www.xpand.com/rdf/>
                         PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                        SELECT ?trackName ?trackImage ?trackPlayCount ?artistName
+                        SELECT ?trackName ?trackImage ?trackPlayCount ?artistName ?youtubeID
                         WHERE{
                             ?track rdf:type cs:Track .
                             ?track cs:Tag <%s> .
                             ?track foaf:name ?trackName .
-                            ?track foaf:Image ?trackImage .
-                            ?track cs:playCount ?trackPlayCount .
                             ?track cs:MusicArtist ?artist .
+                            ?track cs:Album ?album .
+                            ?track cs:playCount ?trackPlayCount .
+                            ?album foaf:Image ?trackImage .
                             ?artist foaf:name ?artistName .
+                            OPTIONAL {
+                                ?track cs:youtubeVideo ?youtubeID .
+                            }
                         }
                         ORDER BY DESC(xsd:integer(?trackPlayCount))
                     """ % (tagURI)
@@ -264,6 +268,10 @@ class Tag:
                     topTrack.append(unquote(e['trackName']['value']))
                     topTrack.append(e['trackImage']['value'])
                     topTrack.append(e['trackPlayCount']['value'])
+                    try:
+                        topTrack.append(unquote(e['youtubeID']['value']))
+                    except Exception:
+                        topTrack.append(None)
                     self.topTracks.append(topTrack)
 
                 self.topTracks = self.topTracks[:self.max_items]

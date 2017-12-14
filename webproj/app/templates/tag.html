@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="container" style="padding-top: 30px;">
-            {% if topArtists|length > 0 and topAlbums|length > 0 and topTracks|length > 0 %}
+            {% if topArtists|length == 0 and topAlbums|length == 0 and topTracks|length == 0 %}
                 <h3 class="text-center" style="padding-top: 150px; padding-bottom: 150px;">
                     Sorry, we have no data about this tag.<br><br>Please, try again soon.
                 </h3>
@@ -83,7 +83,14 @@
                         <div class="col-md-1"></div>
                         {% for track in topTracks %}
                             <div class="col-sm-2 text-center">
-                                <a href="{% url 'artist' artist=track.0 %}">
+                                {% if track.4 %}
+                                    <a href="#" about="http://www.xpand.com/track/{{ track.0 }}/{{ track.1 }}"
+                                       data-toggle="modal" data-target="#videoModal" data-videoID="https://www.youtube.com/embed/{{ track.4 }}"
+                                       data-videoTitle="Listen to {{ track.1 }}, by {{ track.0 }}">
+                                        <span class="glyphicon glyphicon-play-circle thumbnail-video"></span>
+                                {% else %}
+                                    <a href="{% url 'artist' artist=track.0 %}">
+                                {% endif %}
                                     <img class="img-rounded" height="150" width="150" src="{{ track.2 }}">
                                 </a>
                                 <br><br>
@@ -97,6 +104,19 @@
                             </div>
                         {% endfor %}
                         <div class="col-md-1"></div>
+                    </div>
+                    <div id="videoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title"></h4>
+                                </div>
+                                <div class="modal-body" style="padding: 10px;">
+                                    <iframe width="560" height="315" src="" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 {% endif %}
             {% endif %}

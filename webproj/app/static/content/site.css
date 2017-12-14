@@ -204,3 +204,18 @@ a:hover {
     margin: 0 auto;
     display: block;
 }
+
+.thumbnail-video {
+    color: #ebebeb;
+    font-size: 60px;
+    opacity: 0.6;
+    position: absolute;
+    right: 35%;
+    top: 18%;
+    text-shadow: 0 1px 3px rgba(0,0,0,.5);
+    transition:all 500ms ease-in-out;
+}
+
+div > a:hover > .thumbnail-video {
+    color: #4cae4c;
+}
