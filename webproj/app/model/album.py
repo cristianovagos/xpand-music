@@ -239,7 +239,7 @@ class Album:
 
             for e in res['results']['bindings']:
                 # Inserir Track no GraphDB
-                self.transformTrackRDF(e['trackName']['value'])
+                self.transformTrackRDF(quote(e['trackName']['value']))
 
             # Retirar dados da WikiData
             self.fetchWikiData()

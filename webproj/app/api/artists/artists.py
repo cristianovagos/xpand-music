@@ -48,20 +48,16 @@ def getTopArtistsGraphDB(num=5, page=1):
     result = []
     i = 0
     for e in res['results']['bindings']:
-        if i >= (num*page):
-            break
-        if i < ((num*page) - num):
-            continue
-
         aux = []
         aux.append(unquote(e['artistName']['value']))
         aux.append(e['artistCover']['value'])
         result.append(aux)
         i += 1
 
+    result = result[(page - 1) * num:(page * num)]
     return result
 
-def getTopArtistsCountriesGraphDB(country, num=5, page=1):
+def getTopArtistsCountriesGraphDB(country, num=4, page=1):
     client = ApiClient(endpoint=ENDPOINT)
     accessor = GraphDBApi(client)
 

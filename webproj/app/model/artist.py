@@ -5,7 +5,7 @@ from urllib.request import urlopen
 from urllib.error import HTTPError
 from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, \
     getArtistTopTracksIDURL, getArtistTopAlbumsURL, getArtistTopTracksURL
-from ..db.BaseXClient import Session
+#from ..db.BaseXClient import Session
 from ..model.tag import Tag
 from ..utils.countries import getISOCode
 from ..utils.dates import calculateAge, calculateDeathAge
