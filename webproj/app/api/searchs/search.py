@@ -1,5 +1,5 @@
 from ..urls import getArtistSearchURL, getAlbumSearchURL
-from urllib.request import urlopen
+from urllib.request import urlopen, unquote
 import xml.etree.ElementTree as ET
 
 def searchArtist(artistSearch):
@@ -7,8 +7,8 @@ def searchArtist(artistSearch):
     file = urlopen(url)
 
     straux = str(file.read().decode())
-    juntar = '<results for="' + artistSearch + '" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
-    straux = straux.replace('<results for="' + artistSearch + '">', juntar)
+    juntar = '<results for="' + unquote(artistSearch) + '" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
+    straux = straux.replace('<results for="' + unquote(artistSearch) + '">', juntar)
 
     root = ET.fromstring(straux)
     result = []
@@ -27,8 +27,8 @@ def searchAlbum(albumSearch):
     file = urlopen(url)
 
     straux = str(file.read().decode())
-    juntar = '<results for="' + albumSearch + '" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
-    straux = straux.replace('<results for="' + albumSearch + '">', juntar)
+    juntar = '<results for="' + unquote(albumSearch) + '" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
+    straux = straux.replace('<results for="' + unquote(albumSearch) + '">', juntar)
 
     root = ET.fromstring(straux)
     result = []

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from urllib.request import quote
+from urllib.request import quote, unquote
 from .model.artist import Artist
 from .model.album import Album
 from .model.tag import Tag
@@ -188,16 +188,16 @@ def search(request):
         form = SearchForm(request.POST)
 
         if form.is_valid():
-            searching = str(request.POST['searchCriteria'])
+            searching = str(quote(request.POST['searchCriteria']))
             artistSearch = searchArtist(searching)
             albumSearch = searchAlbum(searching)
 
             tparams = {
-                'title': 'xPand | Search by "' + searching + '"',
+                'title': 'xPand | Search by "' + unquote(searching) + '"',
                 'artistSearch'   : artistSearch,
                 'albumSearch'    : albumSearch,
                 'form'           : SearchForm(),
-                'search'         : searching
+                'search'         : unquote(searching)
             }
 
             return render(request, 'searchResult.html', tparams)
