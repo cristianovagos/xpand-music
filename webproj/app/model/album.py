@@ -531,10 +531,6 @@ class Album:
                 res = accessor.sparql_update(body=payload_query,
                                              repo_name=REPO_NAME)
 
-        # Se não houver dados da wikiData não vale a pena continuar
-        if not self.wikiData:
-            return
-
 
     def fetchWikiData(self):
         # Objetivo: obter ID do artista na Wikidata via JSON
@@ -744,8 +740,6 @@ class Album:
                 trackURI = self.getTrackURI(trackName)
 
                 query = """
-                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                         PREFIX cs: <http://www.xpand.com/rdf/>
                         INSERT DATA { 
                             <%s> cs:youtubeVideo "%s" 

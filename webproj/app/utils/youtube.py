@@ -6,7 +6,6 @@ YOUTUBE_ENDPOINT = 'https://www.googleapis.com/youtube/v3/search?part=snippet&q=
 
 def getYoutubeVideoID(artist, song):
     url = urlopen(YOUTUBE_ENDPOINT + quote(artist) + quote(" ") + quote(song) + '&key=' + YOUTUBE_API_KEY, timeout=20)
-    print(YOUTUBE_ENDPOINT + quote(artist) + quote(" ") + quote(song) + '&key=' + YOUTUBE_API_KEY)
 
     data = json.loads(url.read().decode("utf-8"))
 

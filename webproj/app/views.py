@@ -24,7 +24,7 @@ def home(request):
     assert isinstance(request, HttpRequest)
 
     tparams = {
-        'title':'xPand - Your music hub.',
+        'title':'xPand - Your Music Hub.',
         'topArtists' : getTopArtistsGraphDB(),
         'topTracks': getTopTracksGraphDB(),
         'news': getAllNews(6),
@@ -162,7 +162,10 @@ def artist(request, artist):
         'givenName': artistObj.getGivenName(),
         'birthDate': artistObj.getBirthDate(),
         'age' : artistObj.getAge(),
+        'deathDate': artistObj.getDeathDate(),
+        'deathAge' : artistObj.getDeathAge(),
         'bands' : artistObj.getBands(),
+        'foundedAge': artistObj.getFoundedAge(),
     }
 
     return render(request, 'artist.html', tparams)
@@ -200,7 +203,7 @@ def search(request):
             return render(request, 'searchResult.html', tparams)
     return render(request, 'searchResult.html',
                   {
-                      'title': 'xPand - Your music hub.',
+                      'title': 'xPand - Your Music Hub.',
                       'form'    : SearchForm(),
                       'search'  : None
                   })

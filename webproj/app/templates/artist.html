@@ -28,6 +28,9 @@
                         {% if country %}
                             <img src="../static/images/blank.gif" class="flag flag-{{ countryCode }}" alt="{{ country }}" property="cs:country"/>
                         {% endif %}
+                        {% if deathDate %}
+                            <img src="../static/images/death.png" />
+                        {% endif %}
                     </h1>
                     {% if tags|length > 1 %}
                         <p>
@@ -59,7 +62,15 @@
                         <p><b>Given Name: </b><span property="foaf:givenName">{{ givenName }}</span></p>
                     {% endif %}
                     {% if birthDate and age %}
-                        <p><b>Born: </b><span property="cs:birthDate">{{ birthDate }}</span> ({{ age }} years old)</p>
+                        <p>
+                            <b>Born: </b><span property="cs:birthDate">{{ birthDate }}</span>
+                            {% if not deathDate %}
+                                ({{ age }} years old)
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                    {% if deathDate %}
+                        <p><b>Death: </b><span property="cs:deathDate">{{ deathDate }}</span> ({{ deathAge }} years old)</p>
                     {% endif %}
                     {% if bands %}
                         <p><b>Also a member of:</b>
@@ -72,7 +83,7 @@
                         </p>
                     {% endif %}
                     {% if yearFounded %}
-                        <p><b>Founded in: </b><span property="cs:yearFounded">{{ yearFounded }}</span></p>
+                        <p><b>Founded in: </b><span property="cs:yearFounded">{{ yearFounded }}</span> ({{ foundedAge }} years ago)</p>
                     {% endif %}
                     {% if occupations %}
                         <p>

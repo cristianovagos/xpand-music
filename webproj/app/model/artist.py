@@ -8,7 +8,7 @@ from ..api.urls import getArtistInfoURL, getArtistTopAlbumsIDURL, \
 from ..db.BaseXClient import Session
 from ..model.tag import Tag
 from ..utils.countries import getISOCode
-from ..utils.dates import calculateAge
+from ..utils.dates import calculateAge, calculateDeathAge
 from s4api.graphdb_api import GraphDBApi
 from s4api.swagger import ApiClient
 from collections import Counter
@@ -47,8 +47,11 @@ class Artist:
         self.country = None
         self.givenName = None
         self.birthDate = None
+        self.deathDate = None
+        self.deathAge = None
         self.age = None
         self.yearFounded = None
+        self.foundedAge = None
         self.band = False
         self.bands = []
         self.wikiData = False
@@ -108,8 +111,11 @@ class Artist:
 
         for e in res['results']['bindings']:
             self.image = e['imagem']['value']
-            Tag(unquote(e['tagName']['value']), displayTop=False)
-            self.tags.append(unquote(e['tagName']['value']))
+            try:
+                Tag(unquote(e['tagName']['value']), displayTop=False)
+                self.tags.append(unquote(e['tagName']['value']))
+            except Exception:
+                pass
             self.biographyShort = unquote(e['biografia']['value'])
 
         # fazer outra query para os albuns
@@ -299,6 +305,9 @@ class Artist:
                             ?artista cs:birthDate ?birthDate .
                         }
                         OPTIONAL {
+                            ?artista cs:deathDate ?deathDate .
+                        }
+                        OPTIONAL {
                             ?artista cs:yearFounded ?yearFounded .
                         }
                         OPTIONAL {
@@ -388,8 +397,19 @@ class Artist:
                 self.age = None
 
             try:
-                self.yearFounded = unquote(e['yearFounded']['value'])
+                tmpDeathDate = datetime.strptime(unquote(e['deathDate']['value']), '%Y-%m-%d')
+                self.deathDate = tmpDeathDate.strftime('%d/%m/%Y')
+                self.deathAge = calculateDeathAge(tmpDate, tmpDeathDate)
             except Exception:
+                self.deathDate = None
+                self.deathAge = None
+
+            try:
+                tmpDateFounded = datetime.strptime(unquote(e['yearFounded']['value']), '%Y')
+                self.yearFounded = tmpDateFounded.year
+                self.foundedAge = calculateAge(tmpDateFounded)
+            except Exception:
+                self.foundedAge = None
                 self.yearFounded = None
 
         if self.members:
@@ -742,7 +762,7 @@ class Artist:
                 except Exception:
                     instance = None
 
-                if str(instance) == 'band':
+                if 'band' in str(instance):
                     print("Band detected")
                     self.band = True
                     break
@@ -820,7 +840,7 @@ class Artist:
         except Exception:
             youtubeID = None
 
-        bandMembers = gender = birthName = birthDate = year =  None
+        bandMembers = gender = birthName = birthDate = deathDate = year =  None
 
         if not self.band:
             # Sexo
@@ -851,6 +871,13 @@ class Artist:
             except Exception:
                 birthDate = None
 
+            # Data de Morte
+            deathDateProperty = client.get('P570')
+            try:
+                deathDate = str(entity[deathDateProperty])
+            except Exception:
+                deathDate = None
+
         else:
             # País de origem da banda
             countryProperty = client.get('P495')
@@ -862,7 +889,8 @@ class Artist:
             # Ano de criação da banda
             yearProperty = client.get('P571')
             try:
-                year = str(entity[yearProperty].year)
+                year = entity.attributes['claims'][yearProperty.id][0]['mainsnak']['datavalue']['value']['time']
+                year = year[1:5]
             except Exception:
                 year = None
 
@@ -882,7 +910,6 @@ class Artist:
         artistURI = self.getArtistURI()
 
         query = """
-                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                     PREFIX cs: <http://www.xpand.com/rdf/>
                     INSERT DATA {
@@ -957,6 +984,11 @@ class Artist:
                 query += """
                         <%s> cs:birthDate "%s" .
                 """ % (artistURI, quote(birthDate))
+
+        if (deathDate):
+                query += """
+                        <%s> cs:deathDate "%s" .
+                """ % (artistURI, quote(deathDate))
 
         if (year):
                 query += """
@@ -1074,12 +1106,48 @@ class Artist:
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX cs: <http://www.xpand.com/rdf/>
                     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                    SELECT ?band ?artist
+                    SELECT ?artist ?artist2
                     WHERE{
-                        ?band rdf:type cs:MusicArtist .
-                        ?band cs:bandMember "%s" .
                         ?artist rdf:type cs:MusicArtist .
                         ?artist foaf:name "%s" .
+                        ?artist cs:bandMember ?artist2Name .
+                        ?artist2 rdf:type cs:MusicArtist .
+                        ?artist2 foaf:name ?artist2Name .
+                    }
+                """ % (quote(self.name))
+
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query,
+                                     repo_name=REPO_NAME)
+        res = json.loads(res)
+
+        for e in res['results']['bindings']:
+            # obter uris
+            uriBand = e['artist']['value']
+            uriArtist = e['artist2']['value']
+
+            query = """
+                        PREFIX cs: <http://www.xpand.com/rdf/>
+                        INSERT DATA {
+                            <%s> cs:isMember <%s> .
+                        }
+                    """ % (uriArtist, uriBand)
+
+            payload_query = {"update": query}
+            res = accessor.sparql_update(body=payload_query,
+                                         repo_name=REPO_NAME)
+
+        query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX cs: <http://www.xpand.com/rdf/>
+                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    SELECT ?artist ?artist2
+                    WHERE{
+                        ?artist rdf:type cs:MusicArtist .
+                        ?artist foaf:name "%s" .
+                        ?artist2 rdf:type cs:MusicArtist .
+                        ?artist2 foaf:name ?artist2Name .
+                        ?artist2 cs:bandMember "%s" .
                     }
                 """ % (quote(self.name), quote(self.name))
 
@@ -1090,13 +1158,11 @@ class Artist:
 
         for e in res['results']['bindings']:
             # obter uris
-            uriBand = e['band']['value']
+            uriBand = e['artist2']['value']
             uriArtist = e['artist']['value']
 
             query = """
-                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                         PREFIX cs: <http://www.xpand.com/rdf/>
-                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                         INSERT DATA {
                             <%s> cs:isMember <%s> .
                         }
@@ -1665,8 +1731,17 @@ class Artist:
     def getBirthDate(self):
         return self.birthDate
 
+    def getDeathDate(self):
+        return self.deathDate
+
+    def getDeathAge(self):
+        return self.deathAge
+
     def getAge(self):
         return self.age
+
+    def getFoundedAge(self):
+        return self.foundedAge
 
     def getYearFounded(self):
         return self.yearFounded
