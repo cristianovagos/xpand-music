@@ -173,7 +173,17 @@
                                     <br>
                                     <div class="row" about="http://www.xpand.com/track/{{ name }}/{{ song.0 }}">
                                         <div class="col-sm-5 text-right">
-                                            <img class="img-rounded" src="{{ song.1 }}" height="84" width="84" property="foaf:Image">
+                                            {% if song.3 %}
+                                                <a href="#" about="http://www.xpand.com/track/{{ name }}/{{ song.0 }}"
+                                                   data-toggle="modal" data-target="#videoModal" data-videoID="https://www.youtube.com/embed/{{ song.3 }}"
+                                                   data-videoTitle="Listen to {{ song.0 }}, by {{ name }}">
+                                                    <span class="glyphicon glyphicon-play-circle thumbnail-video-small"></span>
+                                            {% endif %}
+                                                <img class="img-rounded" src="{{ song.1 }}" height="84" width="84" property="foaf:Image">
+
+                                            {% if song.3 %}
+                                                </a>
+                                            {% endif %}
                                         </div>
                                         <div class="col-sm-5">
                                             <br>
@@ -182,6 +192,19 @@
                                     </div>
                                     <br>
                                 {% endfor %}
+                                <div id="videoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                <h4 class="modal-title"></h4>
+                                            </div>
+                                            <div class="modal-body" style="padding: 10px;">
+                                                <iframe width="560" height="315" src="" frameborder="0" allowfullscreen></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             {% else %}
                                 <h4 align="center">Sorry, we don't have any song of this artist yet.</h4>
                             {% endif %}

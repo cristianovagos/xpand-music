@@ -219,3 +219,18 @@ a:hover {
 div > a:hover > .thumbnail-video {
     color: #4cae4c;
 }
+
+.thumbnail-video-small {
+    color: #ebebeb;
+    font-size: 40px;
+    opacity: 0.6;
+    position: absolute;
+    right: 23%;
+    top: 20%;
+    text-shadow: 0 1px 3px rgba(0,0,0,.5);
+    transition:all 500ms ease-in-out;
+}
+
+div > a:hover > .thumbnail-video-small {
+    color: #4cae4c;
+}

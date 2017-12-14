@@ -161,7 +161,7 @@ class Artist:
                     PREFIX cs: <http://www.xpand.com/rdf/>
                     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                    SELECT ?trackName ?trackCover ?trackPlayCount
+                    SELECT ?trackName ?trackCover ?trackPlayCount ?youtubeID
                     WHERE{
                         ?artista rdf:type cs:MusicArtist .
                         ?artista foaf:name "%s" .
@@ -173,6 +173,9 @@ class Artist:
                         ?album cs:MusicArtist ?artista .
                         ?track cs:Album ?album .
                         ?album foaf:Image ?trackCover .
+                        OPTIONAL {
+                            ?track cs:youtubeVideo ?youtubeID
+                        }
                     }
                     ORDER BY DESC(xsd:integer(?trackPlayCount))
                 """ % (quote(self.name))
@@ -188,6 +191,10 @@ class Artist:
             trackInfo.append(unquote(e['trackName']['value']))
             trackInfo.append(e['trackCover']['value'])
             trackInfo.append(e['trackPlayCount']['value'])
+            try:
+                trackInfo.append(e['youtubeID']['value'])
+            except Exception:
+                trackInfo.append(None)
 
             self.topTracks.append(trackInfo)
 
