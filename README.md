@@ -20,6 +20,7 @@ NOTE: This project may be incomplete and it surely needs more attention and feat
 
 #### Grades
 First part grade: 19/20
+
 Second part grade: 20/20
 
 ### Developers and collaborators:
@@ -27,28 +28,30 @@ Second part grade: 20/20
 - [André Rodrigues](http://github.com/suduaya)
 
 ### Installation (First part)
-Install Python 3.6, and Django:
+Install Python 3.6, BaseX and Django:
 ```sh
-$ sudo apt-get install python3.6 python3-lxml
+$ sudo apt-get install python3.6 basex python3-lxml
 $ pip3.6 install Django
 ```
 Install GraphDB
 
 ### Installation (Second part)
-Install Python 3.6, Django and GraphDB:
+Install GraphDB (via http://graphdb.ontotext.com)
+Install Python 3.6, Django:
 ```sh
-$ sudo apt-get install python3.6 basex python3-lxml
-$ pip3.6 install Django
+$ sudo apt-get install python3.6 python3-lxml
+$ pip3.6 install Django rdflib Wikidata s4api
 ```
 
-### How to run (First part)
+### How to run (First part specific)
 Initialize the BaseX Server:
 ```sh
 $ basexserver
 ```
 
-### How to run (Second part)
+### How to run (Second part specific)
 Run GraphDB, create 'xpand-music' graph.
+
 
 Run Django server on project folder:
 ```sh
