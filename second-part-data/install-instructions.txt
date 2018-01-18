@@ -1,0 +1,23 @@
+Desenvolvido em Unix/Linux
+
+Instalar:
+    - Python3
+    - Django 
+    - GraphDB (http://graphdb.ontotext.com/)
+
+Depois a partir do terminal Unix executar:
+
+sudo apt-get install python3-lxml
+sudo pip3 install rdflib Wikidata s4api 
+
+Deve depois iniciar o GraphDB, e criar um repositório com o nome "xpand-music".
+
+Para criar um server Django e executar a aplicação deve executar o seguinte comando na pasta "webproj" do projeto:
+
+python3 manage.py runserver
+
+Junto com todo o código está um dataset já preenchido com alguns dados. 
+Basta fazer import no GraphDB Workbench ao ficheiro "dataset.rdf" e executar a aplicação.
+Relembramos que a nossa aplicação pode ser executada com um repositório vazio, 
+sendo que irá acrescentar dados à triplestore caso queira aceder a um artista/álbum que não exista na triplestore.
+
