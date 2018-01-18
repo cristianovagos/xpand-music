@@ -1,8 +1,13 @@
 # xPand Music
 
 A project made for EDC (Engenharia de Dados e Conhecimento) course of MIECT, at DETI-UA (University of Aveiro).
+The same subject and project was used for two parts, using two distinct data representations: XML and RDF.
 
+#### First part
 Our main goal for this project is to put in practise the subjects learned throughout the first part of this course, mainly the use of Django and of XML and XML related tools and XML' derivated technologies such as XML Schema, XSLT, XPath, XQuery and XUpdate as well as the use of a XML database (in our case we chose BaseX) to store and retrieve data from a XML document.
+
+#### Second part
+In the second part, we switched the main data to RDF, and added more features related to RDF, such as inferences and other stuff that relate data to the data stored. For storage we used the triplestore GraphDB, and for URIs we used a dummy URI created for this purpose.
 
 So, xPand Music (as we agreed to call this project, a way of Expanding Music knowledge) uses the Last.fm XML API to fetch data from artists, tracks, albums and charts to collect data, transforms the XML fetched to our structure using XSLT, validates it according to our XML Schema to make sure it has the structure we want, and then stores the data collected on the BaseX database.
 
@@ -10,7 +15,9 @@ The data is fetched from API only when the data itself is not present within the
 
 NOTE: This project may be incomplete and it surely needs more attention and features, but that's what we could do for the deadline provided of the course.
 
-Final grade: 19/20
+#### Grades
+First part grade: 19/20
+Second part grade: 20/20
 
 ### Developers and collaborators:
 - [Cristiano Vagos](http://github.com/cristianovagos)
