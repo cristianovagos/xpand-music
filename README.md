@@ -6,6 +6,9 @@ The same subject and project was used for two parts, using two distinct data rep
 #### First part
 Our main goal for this project is to put in practise the subjects learned throughout the first part of this course, mainly the use of Django and of XML and XML related tools and XML' derivated technologies such as XML Schema, XSLT, XPath, XQuery and XUpdate as well as the use of a XML database (in our case we chose BaseX) to store and retrieve data from a XML document.
 
+Final commit to first part:
+https://github.com/cristianovagos/xpand-music/commit/280aa473fa85eee3ea042b14cee52642dcdae030
+
 #### Second part
 In the second part, we switched the main data to RDF, and added more features related to RDF, such as inferences and other stuff that relate data to the data stored. For storage we used the triplestore GraphDB, and for URIs we used a dummy URI created for this purpose.
 
@@ -23,18 +26,29 @@ Second part grade: 20/20
 - [Cristiano Vagos](http://github.com/cristianovagos)
 - [André Rodrigues](http://github.com/suduaya)
 
-### Installation
-Install Python 3.6, BaseX, LXML and Django:
+### Installation (First part)
+Install Python 3.6, and Django:
+```sh
+$ sudo apt-get install python3.6 python3-lxml
+$ pip3.6 install Django
+```
+Install GraphDB
+
+### Installation (Second part)
+Install Python 3.6, Django and GraphDB:
 ```sh
 $ sudo apt-get install python3.6 basex python3-lxml
 $ pip3.6 install Django
 ```
 
-### How to run
+### How to run (First part)
 Initialize the BaseX Server:
 ```sh
 $ basexserver
 ```
+
+### How to run (Second part)
+Run GraphDB, create 'xpand-music' graph.
 
 Run Django server on project folder:
 ```sh
